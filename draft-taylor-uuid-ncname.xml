@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rfc>
+  <front>
+    <title>Compact, Grammar-Friendly Representations for UUIDs</title>
+    <author initials="D" surname="Taylor" fullname="Dorian Taylor"/>
+    <date/>
+    <abstract>
+      <t>At 122 bits of entropy, the Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a space large enough that the identifiers do not collide. The literal representation, however, specified in RFC 4122, cannot be used in conjunction with a number of formal grammars where it would be beneficial to do so. This document provides the UUID with two additional isomorphic representations to make these applications possible.</t>
+    </abstract>
+  </front>
+  <middle>
+    <section>
+    </section>
+  </middle>
+  <back>
+  </back>
+</rfc>
