@@ -12,29 +12,29 @@
     </author>
     <date year="2021" month="1" day="15"/>
     <abstract>
-      <t>The Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a symbol space large enough that the identifiers do not collide. The literal representation, however, specified in RFC 4122 and elsewhere, cannot be used in conjunction with a number of formal grammars where it would be beneficial to do so. This document specifies an alternative compact representation for UUIDs, with three encoding variants, to make these applications possible.</t>
+      <t>The Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a symbol space large enough that the identifiers do not collide. Many formal grammars, however, are too restrictive to permit the use of UUIDs in their canonical representation (described in RFC 4122 and elsewhere), despite it being beneficial to do so. This document specifies an alternative compact representation for UUIDs, with three encoding variants, to fit these more restrictive contexts.</t>
     </abstract>
   </front>
   <middle>
     <section title="Introduction" anchor="introduction">
-      <t>The formal grammar production "one or more letters or underscores followed by zero or more letters, digits, or underscores" (denoted by the regular expression <tt>/^[A-Za-z_][0-9A-Za-z_]*$/</tt>) is ubiquitous in computing. It is often used for identifiers, and for good reasons. We may encounter some variations on this theme, like admitting hyphens, dots, or Unicode alphanumerics. Some systems may impose additional constraints, like case-sensitivity (or the lack of it), explicit upper- or lower-case letters, or limits on identifier length. UUIDs are standardized 128-bit identifiers with many useful properties, and there are many places where it would make sense to use them, but their standard representation, either with or without the URN prefix (see <xref target="RFC4122">RFC 4122</xref>) does not conform to the constraint described above:</t>
+      <t>The formal grammar production "one or more letters or underscores followed by zero or more letters, digits, or underscores" (denoted by the regular expression <tt>/^[A-Za-z_][0-9A-Za-z_]*$/</tt>) is ubiquitous in computing. It is often used for identifiers, and for good reasons. We may encounter some variations on this theme, like admitting hyphens, dots, or Unicode alphanumerics. Some systems may impose additional constraints, like case-sensitivity (or the lack of it), explicit upper- or lower-case letters, or limits on identifier length. UUIDs are standardized 128-bit identifiers with many useful properties, and there are many places where it would make sense to use them, but their canonical representation, either with or without the URN prefix (see <xref target="RFC4122">RFC 4122</xref>) does not conform to the constraint described above:</t>
       <ul>
         <li>UUIDs contain hyphens (and colons in the case of URNs),</li>
         <li>UUIDs potentially start with a digit,</li>
         <li>UUIDs are potentially too long for the slot.</li>
       </ul>
-      <t>This leads to developers creating incompatible, ad-hoc solutions. The goal of this specification is to address an ostensible need for a UUID representation that is fewer characters in length than the conventional form, and that always starts with a letter.</t>
+      <t>This leads to developers creating incompatible, ad-hoc solutions. The goal of this specification is to address an ostensible need for a UUID representation that is fewer characters in length than the canonical form, and that always starts with a letter.</t>
       <!--<t>There are a number of places in formal languages where it would be useful to put UUIDs, but the grammar forbids it. Many grammars forbid identifiers to begin with numbers, or contain hyphens, or contain colons (as with the URN representation in <xref target="RFC4122">RFC 4122</xref>). The <xref target="XML-NAMES">NCName production</xref>, which is pervasive in XML and RDF applications, is one such example. Up until a recent change, the HTML ID production had similar constraints. Virtually every programming language likewise requires identifiers such as variables and function names to start with a letter or underscore, and very few admit hyphens. This constraint causes developers to turn to ad-hoc solutions when they want to use UUIDs in these places.</t>-->
       <t>This document specifies a strategy for a compact representation of UUIDs, with three encoding variants, as well as the related transformations to and from the familiar UUID format. The proposed name for the general strategy is <em>UUID-NCName</em>, after the <xref target="XML-NAMES">NCName production</xref>, which is pervasive in XML and RDF applications. The encodings are thus styled as <em>UUID-NCName-32</em>, <em>UUID-NCName-58</em>, and <em>UUID-NCName-64</em>, referring to the base of their respective encodings. Each encoding presents tradeoffs in alphabet, symbol length, and case sensitivity.</t>
       <section title="Requirements" anchor="requirements">
         <t>The aim of this specification is to eliminate an extra decision on the part of developers who find themselves in the position of needing to squeeze UUIDs into the aforementioned grammars, by defining alternative representations that are:</t>
         <ul>
-          <li>Significantly shorter lexically than the standard UUID representation (even after removing the hyphens),</li>
+          <li>Significantly shorter lexically than the canonical UUID representation (even after removing the hyphens),</li>
           <li>Guaranteed to begin with with a letter (<tt>/^[A-Za-z]/</tt>),</li>
           <li>Deployable (through different encodings) in case-sensitive and case-insensitive contexts,</li>
-          <li>Devoid of non-payload characters (i.e., every character in the representation is part of the UUID; except for padding to a fixed width; see <xref target="strategy"/>),</li>
-          <li>Fully isomorphic to the standard UUID representation (i.e., accommodates all possible future UUID versions and variants that <xref target="RFC4122"/> does),</li>
-          <li>Amenable to <xref target="detection">detection and identification by heuristic</xref> (in a manner analogous to the standard UUID representation).</li>
+          <li>Devoid of non-payload characters (i.e., every character in the representation is part of the UUID; except for any padding to a prescribed length; see <xref target="strategy"/>),</li>
+          <li>Fully isomorphic to the canonical UUID representation (i.e., accommodates all possible future UUID versions and variants that <xref target="RFC4122"/> does),</li>
+          <li>Amenable to <xref target="detection">detection and identification by heuristic</xref> (in a manner analogous to the canonical UUID representation).</li>
         </ul>
       </section>
       <section title="Motivation &amp; Applications" anchor="applications">
@@ -50,7 +50,7 @@
       <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when, they appear in all capitals, as shown here.</t>
     </section>
     <section title="Strategy" anchor="strategy">
-      <t>Not all 128 bits of a UUID are data; rather, several bits are masked. The top four bits of the third segment, known as <tt>time_hi_and_version</tt>, specify the UUID's version, which is fixed. Up to three high bits in the following segment, called <tt>clock_seq_hi_and_reserved</tt>, specify the variant: how the UUID — if applicable — is meant to be read. We remove these masked quartets (we round up to four bits for the variant) and use them as "bookends" for the rest of the identifier, mapping them to the first sixteen symbols of the Base32 table <xref target="RFC4648"/>, which are all letters. These "bookend" characters provide an analogous hint to a developer of the nature of the UUID, just as one can by looking at the third and fourth segments of a conventional hexadecimal UUID representation.</t>
+      <t>Not all 128 bits of a UUID are data; rather, several bits are masked. The top four bits of the third segment, known as <tt>time_hi_and_version</tt>, specify the UUID's version, which is fixed. Up to three high bits in the following segment, called <tt>clock_seq_hi_and_reserved</tt>, specify the variant: how the UUID — if applicable — is meant to be read. We remove these masked quartets (we round up to four bits for the variant) and use them as "bookends" for the rest of the identifier, mapping them to the first sixteen symbols of the Base32 table <xref target="RFC4648"/>, which are all letters. These "bookend" characters provide an analogous hint to a developer of the nature of the UUID, just as one can by looking at the third and fourth segments of a canonical hexadecimal UUID representation.</t>
       <t>The remaining 120 bits, which we bit-shift to close the gaps of the two masked quartets we removed, now divide evenly by both 5 and 6, the number of bits per character in Base32 and Base64, respectively. <xref target="Base58">Base58</xref> encoding cannot map to an even number of bits, but we don't have the same concerns with regard to padding as we do with Base32 and Base64. Indeed with Base58 we have a different padding issue: some inputs yield shorter outputs than others, so we pad the Base58 representation with underscore characters (<tt>_</tt>, a character <em>not</em> in the Base58 alphabet) to get a consistent length. The details are laid out in the <xref target="encoding">encoding algorithm</xref> below.</t>
       <t>The transformation takes a UUID such as <tt>068d0f22-7ce5-4fe2-9f81-3a09af4ed880</tt>, and returns the results:</t>
       <ul>
@@ -197,18 +197,18 @@ base64url      = %x2d / %x30-39 / %x41-5a / %x5f / %x61-7a
 
 ([A-Pa-p])\b/x # variant bookend and zero-width boundary]]></sourcecode>
       <t>The scrupulous may also wish to examine the bookend characters, for which the first should only correspond to the numbers 1 through 5 (plus zero for the nil UUID) for UUID versions known at the time of this writing, and the other should have the same bits set as expected in <relref section="4.1.1" target="RFC4122">RFC 4122</relref>. Note however that there is room in the spec for another ten UUID versions (up to a hypothetical version 15), and another variant bit that is currently unused.</t>
-      <t>This detection method is considered a heuristic because it is possible to identify false-positive matches in random strings of text, just as it would be with a standard UUID representation. It is assumed that there would be sufficient enough context to positively identify these alternative UUID representations in the wild.</t>
+      <t>This detection method is considered a heuristic because it is possible to identify false-positive matches in random strings of text, just as it would be with a canonical UUID representation. It is assumed that there would be sufficient enough context to positively identify these alternative UUID representations in the wild.</t>
     </section>
 <!--
       <section title="Recognizing UUID-NCName Symbols" anchor="recognizing">
         <t>UUID-NCName symbols always have a fixed length and certain characteristics: UUID-NCName-32 symbols are always exactly 26 characters long while UUID-NCName-64 symbols are always 22 characters long. The version (first bookend character) is mapped to the Base32 table where <tt>A</tt> is 0, so <tt>B</tt> is 1, etc. Random (version 4) UUIDs will therefore always start with the letter <tt>E</tt>. Any value higher than <tt>F</tt> (version 5/truncated SHA-1 UUID) is unspecified (though there is room for future UUID specifications to go all the way up to version 15). Likewise the variant bit-mask defined in <xref target="RFC4122"/> will cause the symbol to always end, modulo upper/lower-case, in <tt>I</tt>, <tt>J</tt>, <tt>K</tt>, or <tt>L</tt> (8, 9, 10, 11).</t>
       </section>-->
       <section title="Equivalency" anchor="equivalency">
-        <t>Two UUID-NCName symbols are necessarily identical if they convert to the same (conventional) UUID. Two UUID-NCName-32 symbols are identical if their string values match when normalized to all upper- or lower-case letters. Two UUID-NCName-58 or UUID-NCName-64 symbols are identical if their string values match when the "bookend" characters are normalized to either upper- or lower-case.</t>
+        <t>Two UUID-NCName symbols are necessarily identical if they convert to the same (canonical) UUID. Two UUID-NCName-32 symbols are identical if their string values match when normalized to all upper- or lower-case letters. Two UUID-NCName-58 or UUID-NCName-64 symbols are identical if their string values match when the "bookend" characters are normalized to either upper- or lower-case.</t>
       </section>
     </section>
     <section title="Algorithms" anchor="algorithms">
-      <t>These are candidate algorithms for encoding and decoding the symbols, transforming them to and from the conventional UUID representation. Equivalent algorithms no doubt exist, but these are the ones used in the <xref target="implementations">reference implementations</xref>.</t>
+      <t>These are candidate algorithms for encoding and decoding the symbols, transforming them to and from the canonical UUID representation. Equivalent algorithms no doubt exist, but these are the ones used in the <xref target="implementations">reference implementations</xref>.</t>
       <section title="Encoding Algorithm" anchor="encoding">
         <t>First we apply the shifting algorithm:</t>
         <ol>
@@ -282,7 +282,7 @@ base64url      = %x2d / %x30-39 / %x41-5a / %x5f / %x61-7a
           <li>Union and assign <tt>ints[2] |= ((ints[1] &amp; 0xf) &lt;&lt; 24) | variant</tt>.</li>
           <li>Assign <tt>ints[1] = (ints[1] &amp; 0xffff0000) | (version &lt;&lt; 12) | ((ints[1] &gt;&gt; 4) &amp; 0xfff)</tt>.</li>
           <li>Convert <tt>ints</tt> back into the new binary string <tt>bin</tt>.</li>
-          <li>Format <tt>bin</tt> as a conventional UUID.</li>
+          <li>Format <tt>bin</tt> as a canonical UUID.</li>
         </ol>
       </section>
     </section>
@@ -290,7 +290,7 @@ base64url      = %x2d / %x30-39 / %x41-5a / %x5f / %x61-7a
       <t>There are no discernible IANA considerations associated with this specification.</t>
     </section>
     <section title="Security Considerations" anchor="security">
-      <t>As UUID-NCName symbols are isomorphic to their conventional UUID representations, the security considerations for these symbols also the same as <xref target="RFC4122"/>, though we repeat here the admonition not to assume that UUIDs are hard to guess.</t>
+      <t>As UUID-NCName symbols are isomorphic to their canonical UUID representations, the security considerations for these symbols also the same as <xref target="RFC4122"/>, though we repeat here the admonition not to assume that UUIDs are hard to guess.</t>
     </section>
   </middle>
   <back>
