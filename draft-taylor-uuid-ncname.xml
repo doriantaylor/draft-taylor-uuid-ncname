@@ -12,12 +12,13 @@
     </author>
     <date year="2021" month="1" day="15"/>
     <abstract>
-      <t>The Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a symbol space large enough that the identifiers do not collide. Many formal grammars, however, are too restrictive to permit the use of UUIDs in their canonical representation (described in RFC 4122 and elsewhere), despite it being beneficial to do so. This document specifies an alternative compact representation for UUIDs, with three encoding variants, to fit these more restrictive contexts.</t>
+      <t>The Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a symbol space large enough that the identifiers do not collide. Many formal grammars, however, are too restrictive to permit the use of UUIDs in their canonical representation (described in RFC 4122 and elsewhere), despite it being useful to do so. This document specifies an alternative compact representation for UUIDs that preserves some properties of the canonical form, with three encoding varietals, to fit these more restrictive contexts.</t>
     </abstract>
   </front>
   <middle>
     <section title="Introduction" anchor="introduction">
-      <t>The formal grammar production "one or more letters or underscores followed by zero or more letters, digits, or underscores" (denoted by the regular expression <tt>/^[A-Za-z_][0-9A-Za-z_]*$/</tt>) is ubiquitous in computing. It is often used for identifiers, and for good reasons. We may encounter some variations on this theme, like admitting hyphens, dots, or Unicode alphanumerics. Some systems may impose additional constraints, like case-sensitivity (or the lack of it), explicit upper- or lower-case letters, or limits on identifier length. UUIDs are standardized 128-bit identifiers with many useful properties, and there are many places where it would make sense to use them, but their canonical representation, either with or without the URN prefix (see <xref target="RFC4122">RFC 4122</xref>) does not conform to the constraint described above:</t>
+      <t>The formal grammar production "one or more letters or underscores followed by zero or more letters, digits, or underscores" (denoted by the regular expression <tt>/^[A-Za-z_][0-9A-Za-z_]*$/</tt>) is ubiquitous in computing. It is often used for identifiers, and for good reasons. We may encounter some variations on this theme, like admitting hyphens, dots, or Unicode alphanumerics. Some systems may impose additional constraints, like case-sensitivity (or the lack of it), explicit upper- or lower-case letters, or limits on identifier length.</t>
+      <t>UUIDs are standardized 128-bit identifiers with many useful properties, and there are many places where it would make sense to use them, but their canonical representation, either with or without the URN prefix (see <xref target="RFC4122">RFC 4122</xref>) does not conform to the constraint described above:</t>
       <ul>
         <li>UUIDs contain hyphens (and colons in the case of URNs),</li>
         <li>UUIDs potentially start with a digit,</li>
@@ -27,7 +28,7 @@
       <!--<t>There are a number of places in formal languages where it would be useful to put UUIDs, but the grammar forbids it. Many grammars forbid identifiers to begin with numbers, or contain hyphens, or contain colons (as with the URN representation in <xref target="RFC4122">RFC 4122</xref>). The <xref target="XML-NAMES">NCName production</xref>, which is pervasive in XML and RDF applications, is one such example. Up until a recent change, the HTML ID production had similar constraints. Virtually every programming language likewise requires identifiers such as variables and function names to start with a letter or underscore, and very few admit hyphens. This constraint causes developers to turn to ad-hoc solutions when they want to use UUIDs in these places.</t>-->
       <t>This document specifies a strategy for a compact representation of UUIDs, with three encoding variants, as well as the related transformations to and from the familiar UUID format. The proposed name for the general strategy is <em>UUID-NCName</em>, after the <xref target="XML-NAMES">NCName production</xref>, which is pervasive in XML and RDF applications. The encodings are thus styled as <em>UUID-NCName-32</em>, <em>UUID-NCName-58</em>, and <em>UUID-NCName-64</em>, referring to the base of their respective encodings. Each encoding presents tradeoffs in alphabet, symbol length, and case sensitivity.</t>
       <section title="Requirements" anchor="requirements">
-        <t>The aim of this specification is to eliminate an extra decision on the part of developers who find themselves in the position of needing to squeeze UUIDs into the aforementioned grammars, by defining alternative representations that are:</t>
+        <t>The aim of this specification is to eliminate work on the part of developers who find themselves in the position of needing to squeeze UUIDs into the aforementioned grammars, by defining alternative representations that are:</t>
         <ul>
           <li>Significantly shorter lexically than the canonical UUID representation (even after removing the hyphens),</li>
           <li>Guaranteed to begin with with a letter (<tt>/^[A-Za-z]/</tt>),</li>
@@ -72,8 +73,8 @@ bookend        = %x41-50 / %x61-70 ; [A-Pa-p]
 
 base32         = %x32-37 / %x41-5a / %x61-7a ; [2-7A-Za-z]
 
-b58char        = %x31-39 / %x41-48 / %x4a-4e / %x50-5a / %x61-7a
-                 ; [1-9A-HJ-NP-Za-z]
+b58char        = %x31-39 / %x41-48 / %x4a-4e / %x50-5a /
+                 %x61-6c / %x6d-7a ; [1-9A-HJ-NP-Za-km-z]
 
 base58         = 15b58char 6"_" / 16b58char 5"_" /
                  17b58char 4"_" / 18b58char 3"_" /
@@ -190,10 +191,10 @@ base64url      = %x2d / %x30-39 / %x41-5a / %x5f / %x61-7a
 
 ([2-7A-Za-z]{24}|[-0-9A-Z_a-z]{20}| # base32 and 64
 
-  (?:[1-9A-HJ-NP-Za-z]{15}_{6}|[1-9A-HJ-NP-Za-z]{16}_{5}|
-     [1-9A-HJ-NP-Za-z]{17}_{4}|[1-9A-HJ-NP-Za-z]{18}___|
-     [1-9A-HJ-NP-Za-z]{19}__|[1-9A-HJ-NP-Za-z]{20}_|
-     [1-9A-HJ-NP-Za-z]{21})) # base58 with underscore pad
+  (?:[1-9A-HJ-NP-Za-km-z]{15}_{6}|[1-9A-HJ-NP-Za-km-z]{16}_{5}|
+     [1-9A-HJ-NP-Za-km-z]{17}_{4}|[1-9A-HJ-NP-Za-km-z]{18}___|
+     [1-9A-HJ-NP-Za-km-z]{19}__|[1-9A-HJ-NP-Za-km-z]{20}_|
+     [1-9A-HJ-NP-Za-km-z]{21})) # base58 with underscore pad
 
 ([A-Pa-p])\b/x # variant bookend and zero-width boundary]]></sourcecode>
       <t>The scrupulous may also wish to examine the bookend characters, for which the first should only correspond to the numbers 1 through 5 (plus zero for the nil UUID) for UUID versions known at the time of this writing, and the other should have the same bits set as expected in <relref section="4.1.1" target="RFC4122">RFC 4122</relref>. Note however that there is room in the spec for another ten UUID versions (up to a hypothetical version 15), and another variant bit that is currently unused.</t>
