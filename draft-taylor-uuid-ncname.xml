@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rfc version="3" category="info" submissionType="independent" ipr="trust200902" updates="RFC4122" docName="draft-taylor-uuid-ncname-01">
+<rfc version="3" category="info" submissionType="independent" ipr="trust200902" updates="RFC4122" docName="draft-taylor-uuid-ncname-02">
   <front>
     <title>Compact UUIDs for Constrained Grammars</title>
-    <seriesInfo name="Internet-Draft" status="informational" value="draft-taylor-uuid-ncname-01"/>
+    <seriesInfo name="Internet-Draft" status="informational" value="draft-taylor-uuid-ncname-02"/>
     <author initials="D" surname="Taylor" fullname="Dorian Taylor">
       <organization>Independent</organization>
       <address>
@@ -10,7 +10,7 @@
         <uri>https://doriantaylor.com/</uri>
       </address>
     </author>
-    <date year="2021" month="1" day="15"/>
+    <date year="2021" month="8" day="20"/>
     <abstract>
       <t>The Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a symbol space large enough that the identifiers do not collide. Many formal grammars, however, are too restrictive to permit the use of UUIDs in their canonical representation (described in RFC 4122 and elsewhere), despite it being useful to do so. This document specifies an alternative compact representation for UUIDs that preserves some properties of the canonical form, with three encoding varietals, to fit these more restrictive contexts.</t>
     </abstract>
@@ -20,11 +20,11 @@
       <t>The formal grammar production "one or more letters or underscores followed by zero or more letters, digits, or underscores" (denoted by the regular expression <tt>/^[A-Za-z_][0-9A-Za-z_]*$/</tt>) is ubiquitous in computing. It is often used for identifiers, and for good reasons. We may encounter some variations on this theme, like admitting hyphens, dots, or Unicode alphanumerics. Some systems may impose additional constraints, like case-sensitivity (or the lack of it), explicit upper- or lower-case letters, or limits on identifier length.</t>
       <t>UUIDs are standardized 128-bit identifiers with many useful properties, and there are many places where it would make sense to use them, but their canonical representation, either with or without <xref target="RFC4122">the URN prefix</xref>, does not conform to the constraint described above:</t>
       <ul>
-        <li>UUIDs contain hyphens (and colons in the case of URNs),</li>
+        <li>UUIDs contain hyphens (and colons, in UUID URNs),</li>
         <li>UUIDs potentially start with a digit,</li>
-        <li>UUIDs are potentially too long for the given slot.</li>
+        <li>UUIDs are potentially too long for a given slot.</li>
       </ul>
-      <t>This leads to developers creating incompatible, ad-hoc solutions. The goal of this specification is to address an ostensible need for a UUID representation that is fewer characters in length than the canonical form, and that always starts with a letter.</t>
+      <t>This leads to developers creating ad-hoc, and generally solutions. The goal of this specification is to address an ostensible need for a UUID representation that is fewer characters in length than the canonical form, and that always starts with a letter.</t>
       <t>This document specifies a strategy for a compact representation of UUIDs, with three encoding variants, as well as the related transformations to and from the familiar UUID format. The proposed name for the general strategy is <em>UUID-NCName</em>, after the <xref target="XML-NAMES">NCName grammar production</xref>, which is pervasive in XML and RDF applications. The encodings are thus styled as <em>UUID-NCName-32</em>, <em>UUID-NCName-58</em>, and <em>UUID-NCName-64</em>, referring to the numerical base of their respective encodings. Each encoding presents tradeoffs in alphabet, symbol length, and case sensitivity.</t>
       <section title="Requirements" anchor="requirements">
         <t>The aim of this specification is to eliminate work on the part of developers who find themselves in the position of needing to squeeze UUIDs into the aforementioned grammars, by defining alternative representations that are:</t>
@@ -38,7 +38,7 @@
         </ul>
       </section>
       <section title="Motivation &amp; Applications" anchor="applications">
-        <t>The purpose of an identifier in general is to pick out some information resource or other, such that it can be referred to, ideally unambiguously. The purpose of a large, generated identifier like the UUID, is to satisfy the uniqueness criterion while also specifying a datatype and normal form for said identifiers, and ultimately alleviate the need to sit down and think these identifiers up. Why one would want to go inserting UUIDs in places they wouldn't otherwise fit, is so these UUIDs can be cross-referenced in some other database where they <em>do</em> fit. Consider:</t>
+        <t>The purpose of an identifier in general is to pick out some information resource or other, such that it can be referred to, ideally unambiguously. The purpose of a large, generated identifier like the UUID, is to satisfy the uniqueness criterion while also specifying a datatype and normal form for said identifiers, and ultimately alleviate the need to set time aside to think up names for things. Why one would want to go inserting UUIDs in places they wouldn't otherwise fit, is so these UUIDs can be cross-referenced in some other database where they <em>do</em> fit. Consider:</t>
         <ul>
           <li>A programming environment that separates the task of writing logic from naming things, stores identifiers internally as UUID-NCName-32 prior to transforming them on display or export, thus preserving the correctness of the syntax.</li>
           <li>A component content management system that uses UUIDs to identify elementary content components, uses the UUID-NCName-64 (or UUID-NCName-58, but in this case Base64 works too and is one byte shorter) representations of the same UUIDs as fragment identifiers for when those components are transcluded.</li>
