@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rfc version="3" category="info" submissionType="independent" ipr="trust200902" updates="4122" docName="draft-taylor-uuid-ncname-03">
+<rfc version="3" category="info" submissionType="independent" ipr="trust200902" updates="4122" docName="draft-taylor-uuid-ncname-04">
   <front>
     <title>Compact UUIDs for Constrained Grammars</title>
-    <seriesInfo name="Internet-Draft" status="informational" value="draft-taylor-uuid-ncname-03"/>
+    <seriesInfo name="Internet-Draft" status="informational" value="draft-taylor-uuid-ncname-04"/>
     <author initials="D" surname="Taylor" fullname="Dorian Taylor">
       <organization>Independent</organization>
       <address>
@@ -10,7 +10,7 @@
         <uri>https://doriantaylor.com/</uri>
       </address>
     </author>
-    <date year="2023" month="1" day="10"/>
+    <date year="2024" month="9" day="19"/>
     <abstract>
       <t>The Universally Unique Identifier is a suitable standard for, as the name suggests, uniquely identifying entities in a symbol space large enough that the identifiers do not collide. Many formal grammars, however, are too restrictive to permit the use of UUIDs in their canonical representation (described in RFC 4122 and elsewhere), despite it being useful to do so. This document specifies an alternative compact representation for UUIDs that preserves some properties of the canonical form, with three encoding varietals, to fit these more restrictive contexts.</t>
     </abstract>
@@ -392,10 +392,11 @@ base64url      = %x2d / %x30-39 / %x41-5a / %x5f / %x61-7a
       </table>
     </section>
     <section title="Implementations" anchor="implementations">
-      <t>As of this writing, there are two implementations of UUID-NCName:</t>
+      <t>As of this writing, there are three implementations of UUID-NCName:</t>
       <ul>
         <li>Perl, <eref target="https://metacpan.org/pod/Data::UUID::NCName"/></li>
         <li>Ruby, <eref target="https://rubygems.org/gems/uuid-ncname"/></li>
+        <li>Java, by Werner Randelshofer <eref target="https://github.com/wrandelshofer/UuidNCName"/></li>
       </ul>
     </section>
   </back>
