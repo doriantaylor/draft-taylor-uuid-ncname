@@ -1,0 +1,3309 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Compact UUIDs for Constrained Grammars</title>
+<meta content="Dorian Taylor" name="author">
+<meta content="Kyzer R. Davis" name="author">
+<meta content="
+       This document specifies an alternative compact representation for Universally Unique Identifier (UUID) from RFC9562 that preserves some properties of the UUID canonical format to fit more restrictive grammar contexts such as the non-colonized name (NCName) grammar production, which is pervasive in eXtensible Markup Language (XML). 
+    " name="description">
+<meta content="xml2rfc 3.32.0" name="generator">
+<meta content="uuid" name="keyword">
+<meta content="ncname" name="keyword">
+<meta content="base32" name="keyword">
+<meta content="base64" name="keyword">
+<meta content="base58" name="keyword">
+<meta content="draft-taylor-uuid-ncname-05" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.32.0
+    Python 3.12.3
+    ConfigArgParse 1.7.1
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.0.2
+    platformdirs 4.9.2
+    pycountry 26.2.16
+    PyYAML 6.0.3
+    requests 2.32.5
+    wcwidth 0.6.0
+    weasyprint 65.0
+-->
+<link href="draft-taylor-uuid-ncname.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://static.ietf.org/fonts/noto-sans/import.css'); /* Sans-serif */
+@import url('https://static.ietf.org/fonts/noto-serif/import.css'); /* Serif (print) */
+@import url('https://static.ietf.org/fonts/roboto-mono/import.css'); /* Monospace */
+
+:root {
+  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+  --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+  --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+}
+
+@viewport {
+  zoom: 1.0;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-wrap: break-word;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+@media print {
+  svg {
+    max-height: 850px;
+    max-width: 660px;
+  }
+}
+svg[font-family~="serif" i], svg [font-family~="serif" i] {
+  font-family: var(--font-serif);
+}
+svg[font-family~="sans-serif" i], svg [font-family~="sans-serif" i] {
+  font-family: var(--font-sans);
+}
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  display: table;
+  border: none;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.ulBare, li.ulBare {
+  margin-left: 0em !important;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre {
+  background-color: #f9f9f9;
+  font-family: var(--font-mono);
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+blockquote > *:last-child {
+  margin-bottom: 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+.xref {
+  overflow-wrap: normal;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+/* Fix PDF info block run off issue */
+@media print {
+  #identifiers dd {
+    max-width: 100%;
+  }
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.refSubseries {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: var(--font-sans);
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  .breakable pre {
+    break-inside: auto;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.sourcecode pre,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin-bottom: 0.25em;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0.5em;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .artwork > pre,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Avoid narrow tables forcing too narrow table captions, which may render badly */
+table {
+  min-width: 20em;
+}
+/* ol type a */
+ol.type-a { list-style-type: lower-alpha; }
+ol.type-A { list-style-type: upper-alpha; }
+ol.type-i { list-style-type: lower-roman; }
+ol.type-I { list-style-type: upper-roman; }
+/* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+table {
+  border: 1px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+}
+tr {
+  break-inside: avoid;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f8f8f8;
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+/* Add support for keepWithNext */
+.keepWithNext {
+  break-after: avoid-page;
+  break-after: avoid-page;
+}
+/* Add support for keepWithPrevious */
+.keepWithPrevious {
+  break-before: avoid-page;
+}
+/* Change the approach to avoiding breaks inside artwork etc. */
+figure, pre, table, .artwork, .sourcecode  {
+  break-before: auto;
+  break-after: auto;
+}
+/* Avoid breaks between <dt> and <dd> */
+dl {
+  break-before: auto;
+  break-inside: auto;
+}
+dt {
+  break-before: auto;
+  break-after: avoid-page;
+}
+dd {
+  break-before: avoid-page;
+  break-after: auto;
+  orphans: 3;
+  widows: 3
+}
+span.break, dd.break {
+  margin-bottom: 0;
+  min-height: 0;
+  break-before: auto;
+  break-inside: auto;
+  break-after: auto;
+}
+/* Undo break-before ToC */
+@media print {
+  #toc {
+    break-before: auto;
+  }
+}
+/* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+ul.compact p, .ulCompact p,
+ol.compact p, .olCompact p {
+ margin: 0;
+}
+/* But the list as a whole needs the extra space at the end */
+section ul.compact,
+section .ulCompact,
+section ol.compact,
+section .olCompact {
+  margin-bottom: 1em;                    /* same as p not within ul.compact etc. */
+}
+/* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+tt, code {
+  background-color: transparent;
+}
+p tt, p code, li tt, li code, dt tt, dt code {
+  background-color: #f8f8f8;
+}
+/* Tweak the pre margin -- 0px doesn't come out well */
+pre {
+   margin-top: 0.5px;
+}
+/* Tweak the compact list text */
+ul.compact, .ulCompact,
+ol.compact, .olCompact,
+dl.compact, .dlCompact {
+  line-height: normal;
+}
+/* Don't add top margin for nested lists */
+li > ul, li > ol, li > dl,
+dd > ul, dd > ol, dd > dl,
+dl > dd > dl {
+  margin-top: initial;
+}
+/* Elements that should not be rendered on the same line as a <dt> */
+/* This should match the element list in writer.text.TextWriter.render_dl() */
+dd > div.artwork:first-child,
+dd > aside:first-child,
+dd > blockquote:first-child,
+dd > figure:first-child,
+dd > ol:first-child,
+dd > div.sourcecode:first-child,
+dd > table:first-child,
+dd > ul:first-child {
+  clear: left;
+}
+/* fix for weird browser behaviour when <dd/> is empty */
+dt+dd:empty::before{
+  content: "\00a0";
+}
+/* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+li > p {
+  margin-bottom: 0.5em
+}
+/* Don't let p margin spill out from inside list items */
+li > p:last-of-type:only-child {
+  margin-bottom: 0;
+}
+</style>
+<link href="rfc-local.css" rel="stylesheet" type="text/css">
+<script type="application/javascript">async function addMetadata(){try{const e=document.styleSheets[0].cssRules;for(let t=0;t<e.length;t++)if(/#identifiers/.exec(e[t].selectorText)){const a=e[t].cssText.replace("#identifiers","#external-updates");document.styleSheets[0].insertRule(a,document.styleSheets[0].cssRules.length)}}catch(e){console.log(e)}const e=document.getElementById("external-metadata");if(e)try{var t,a="",o=function(e){const t=document.getElementsByTagName("meta");for(let a=0;a<t.length;a++)if(t[a].getAttribute("name")===e)return t[a].getAttribute("content");return""}("rfc.number");if(o){t="https://www.rfc-editor.org/rfc/rfc"+o+".json";try{const e=await fetch(t);a=await e.json()}catch(e){t=document.URL.indexOf("html")>=0?document.URL.replace(/html$/,"json"):document.URL+".json";const o=await fetch(t);a=await o.json()}}if(!a)return;e.style.display="block";const s="",d="https://datatracker.ietf.org/doc",n="https://datatracker.ietf.org/ipr/search",c="https://www.rfc-editor.org/info",l=a.doc_id.toLowerCase(),i=a.doc_id.slice(0,3).toLowerCase(),f=a.doc_id.slice(3).replace(/^0+/,""),u={status:"Status",obsoletes:"Obsoletes",obsoleted_by:"Obsoleted By",updates:"Updates",updated_by:"Updated By",see_also:"See Also",errata_url:"Errata"};let h="<dl style='overflow:hidden' id='external-updates'>";["status","obsoletes","obsoleted_by","updates","updated_by","see_also","errata_url"].forEach(e=>{if("status"==e){a[e]=a[e].toLowerCase();var t=a[e].split(" "),o=t.length,w="",p=1;for(let e=0;e<o;e++)p<o?w=w+r(t[e])+" ":w+=r(t[e]),p++;a[e]=w}else if("obsoletes"==e||"obsoleted_by"==e||"updates"==e||"updated_by"==e){var g,m="",b=1;g=a[e].length;for(let t=0;t<g;t++)a[e][t]&&(a[e][t]=String(a[e][t]).toLowerCase(),m=b<g?m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>, ":m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>",b++);a[e]=m}else if("see_also"==e){var y,L="",C=1;y=a[e].length;for(let t=0;t<y;t++)if(a[e][t]){a[e][t]=String(a[e][t]);var _=a[e][t].slice(0,3),v=a[e][t].slice(3).replace(/^0+/,"");L=C<y?"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>, ":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>, ":"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>",C++}a[e]=L}else if("errata_url"==e){var R="";R=a[e]?R+"<a href='"+a[e]+"'>Errata exist</a> | <a href='"+d+"/"+l+"'>Datatracker</a>| <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>":"<a href='"+d+"/"+l+"'>Datatracker</a> | <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>",a[e]=R}""!=a[e]?"Errata"==u[e]?h+=`<dt>More info:</dt><dd>${a[e]}</dd>`:h+=`<dt>${u[e]}:</dt><dd>${a[e]}</dd>`:"Errata"==u[e]&&(h+=`<dt>More info:</dt><dd>${a[e]}</dd>`)}),h+="</dl>",e.innerHTML=h}catch(e){console.log(e)}else console.log("Could not locate metadata <div> element");function r(e){return e.charAt(0).toUpperCase()+e.slice(1)}}window.removeEventListener("load",addMetadata),window.addEventListener("load",addMetadata);</script>
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">uuid-ncname</td>
+<td class="right">April 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Taylor &amp; Davis</td>
+<td class="center">Expires 3 October 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Independent</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-taylor-uuid-ncname-05</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-04-01" class="published">1 April 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-10-03">3 October 2026</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">D. Taylor</div>
+</div>
+<div class="author">
+      <div class="author-name">K. R. Davis</div>
+<div class="org">Cisco Systems</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Compact UUIDs for Constrained Grammars</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document specifies an alternative compact representation for Universally Unique Identifier (UUID) from RFC9562 that preserves some properties of the UUID canonical format to fit more restrictive grammar contexts such as the non-colonized name (NCName) grammar production, which is pervasive in eXtensible Markup Language (XML).<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 3 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-motivation-applications" class="internal xref">Motivation &amp; Applications</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-encoding-strategy" class="internal xref">Encoding Strategy</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-syntax" class="internal xref">Syntax</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-bookends" class="internal xref">Bookends</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-detection-heuristic" class="internal xref">Detection Heuristic</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-equivalency" class="internal xref">Equivalency</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-encoding-algorithm" class="internal xref">Encoding Algorithm</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-bit-shifting-algorithm" class="internal xref">Bit Shifting Algorithm</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-uuid-ncname-32-base32" class="internal xref">UUID-NCName-32 (Base32)</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-uuid-ncname-58-base58" class="internal xref">UUID-NCName-58 (Base58)</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-uuid-ncname-64-base64url" class="internal xref">UUID-NCName-64 (Base64url)</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-decoding-algorithm" class="internal xref">Decoding Algorithm</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-pseudocode" class="internal xref">Pseudocode</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-bit-shifting-example" class="internal xref">Bit Shifting Example</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-encoding-example" class="internal xref">Encoding Example</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.1">
+                    <p id="section-toc.1-1.9.2.2.2.1.1"><a href="#appendix-A.2.1" class="auto internal xref">A.2.1</a>.  <a href="#name-uuid-ncname-32-example" class="internal xref">UUID-NCName-32 Example</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.2">
+                    <p id="section-toc.1-1.9.2.2.2.2.1"><a href="#appendix-A.2.2" class="auto internal xref">A.2.2</a>.  <a href="#name-uuid-ncname-58-example" class="internal xref">UUID-NCName-58 Example</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.3">
+                    <p id="section-toc.1-1.9.2.2.2.3.1"><a href="#appendix-A.2.3" class="auto internal xref">A.2.3</a>.  <a href="#name-uuid-ncname-64-example" class="internal xref">UUID-NCName-64 Example</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-decoding-example" class="internal xref">Decoding Example</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#appendix-B.1" class="auto internal xref">B.1</a>.  <a href="#name-generic-uuid" class="internal xref">Generic UUID</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#appendix-B.2" class="auto internal xref">B.2</a>.  <a href="#name-nil-uuid" class="internal xref">NIL UUID</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#appendix-B.3" class="auto internal xref">B.3</a>.  <a href="#name-max-uuid" class="internal xref">MAX UUID</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.4">
+                <p id="section-toc.1-1.10.2.4.1"><a href="#appendix-B.4" class="auto internal xref">B.4</a>.  <a href="#name-uuidv1" class="internal xref">UUIDv1</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.5">
+                <p id="section-toc.1-1.10.2.5.1"><a href="#appendix-B.5" class="auto internal xref">B.5</a>.  <a href="#name-uuidv2" class="internal xref">UUIDv2</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.6">
+                <p id="section-toc.1-1.10.2.6.1"><a href="#appendix-B.6" class="auto internal xref">B.6</a>.  <a href="#name-uuidv3" class="internal xref">UUIDv3</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.7">
+                <p id="section-toc.1-1.10.2.7.1"><a href="#appendix-B.7" class="auto internal xref">B.7</a>.  <a href="#name-uuidv4" class="internal xref">UUIDv4</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.8">
+                <p id="section-toc.1-1.10.2.8.1"><a href="#appendix-B.8" class="auto internal xref">B.8</a>.  <a href="#name-uuidv5" class="internal xref">UUIDv5</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.9">
+                <p id="section-toc.1-1.10.2.9.1"><a href="#appendix-B.9" class="auto internal xref">B.9</a>.  <a href="#name-uuidv6" class="internal xref">UUIDv6</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.10">
+                <p id="section-toc.1-1.10.2.10.1"><a href="#appendix-B.10" class="auto internal xref">B.10</a>. <a href="#name-uuidv7" class="internal xref">UUIDv7</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.11">
+                <p id="section-toc.1-1.10.2.11.1"><a href="#appendix-B.11" class="auto internal xref">B.11</a>. <a href="#name-uuidv8" class="internal xref">UUIDv8</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-implementations" class="internal xref">Implementations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">The formal grammar production "one or more letters or underscores followed by zero or more letters, digits, or underscores" (denoted by the regular expression <code>/^[A-Za-z_][0-9A-Za-z_]*$/</code>) is ubiquitous in computing.
+It is often used for identifiers, and for good reasons.
+One may encounter some variations on this theme, like admitting hyphens, dots, or Unicode alphanumerics.
+Some systems may impose additional constraints, like case-sensitivity (or the lack of it), explicit upper- or lower-case letters, or limits on identifier length.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">UUIDs are standardized 128-bit identifiers with many useful properties, and there are many places where it would make sense to use them, but their canonical representation, either with or without <span><a href="#RFC9562" class="internal xref">the URN prefix</a> [<a href="#RFC9562" class="cite xref">RFC9562</a>]</span>, does not conform to the grammar constraints described above:<a href="#section-1-2" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-1-3.1">
+          <p id="section-1-3.1.1">UUIDs contain hyphens (and colons, in UUID URNs),<a href="#section-1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-1-3.2">
+          <p id="section-1-3.2.1">UUIDs may potentially start with a digit,<a href="#section-1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-1-3.3">
+          <p id="section-1-3.3.1">UUIDs may potentially be too long for a given slot.<a href="#section-1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-4">This leads to developers creating ad-hoc, overlapping, and generally mutually incompatible solutions.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">The goal of this specification is to address an ostensible need for a UUID representation which:<a href="#section-1-5" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-1-6.1">
+          <p id="section-1-6.1.1">Produces a format based on a given UUID algorithm that can be encoded/decoded to and from the canonical UUID representation, and is thus isomorphic to it.<a href="#section-1-6.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-1-6.2">
+          <p id="section-1-6.2.1">Produces an output that is fewer characters in length than the canonical form (even after removing the hyphens), and thus more compact.<a href="#section-1-6.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-1-6.3">
+          <p id="section-1-6.3.1">Ensures that the output format always starts (and ends) with a letter (<code>/^[A-Za-z]/</code>) and contains only letters and digits (<code>/[A-Za-z0-9]/</code>), so the value can be used in contexts where the aforementioned grammar is required.<a href="#section-1-6.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-1-6.4">
+          <p id="section-1-6.4.1">Provides different encoding variants to accommodate different use cases, such as case-sensitive and case-insensitive.<a href="#section-1-6.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-1-6.5">
+          <p id="section-1-6.5.1">Is amenable to detection and identification by heuristics, in a manner analogous to the canonical UUID representation.<a href="#section-1-6.5.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-7">This document specifies a strategy for a compact representation of UUIDs, with multiple encoding variants, as well as the related transformations to and from the familiar UUID format.
+These alternative UUID formats are suitable methods for uniquely identifying entities in a symbol space large enough that the identifiers do not collide.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-8">The proposed name for the general strategy is "UUID-NCName", after the <span><a href="#XML-NAMES" class="internal xref">NCName grammar production</a> [<a href="#XML-NAMES" class="cite xref">XML-NAMES</a>]</span>, which is pervasive in XML and
+RDF applications.
+The encodings are thus styled as "UUID-NCName-32" for <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-6" class="relref">Section 6</a></span>, "UUID-NCName-58" for <span>[<a href="#Base58" class="cite xref">Base58</a>]</span>, and "UUID-NCName-64" for <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>], <a href="https://rfc-editor.org/rfc/rfc4648#section-5" class="relref">Section 5</a></span>, referring to the numerical base of their respective encodings.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<div id="applications">
+<section id="section-1.1">
+        <h3 id="name-motivation-applications">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-motivation-applications" class="section-name selfRef">Motivation &amp; Applications</a>
+        </h3>
+<p id="section-1.1-1">The purpose of a large, generated identifier like the UUID is to satisfy the uniqueness criterion while also specifying a datatype and normal form for said identifiers, and ultimately alleviate the need to set time aside to think up names for things.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">Why one would want to go inserting UUIDs in places they would not otherwise fit, is so these UUIDs can be cross-referenced in some other database where they <em>do</em> fit.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">Consider:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-1.1-4.1">
+            <p id="section-1.1-4.1.1">A programming environment that separates the task of writing logic from naming things, stores identifiers internally as UUID-NCName-32 prior to transforming them on display or export, thus preserving the correctness of the syntax.<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="compact" id="section-1.1-4.2">
+            <p id="section-1.1-4.2.1">A component content management system that uses UUIDs to identify elementary content components, uses the UUID-NCName-64 (or UUID-NCName-58) representations of the same UUIDs as fragment identifiers for when those components are transcluded.<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="strategy">
+<section id="section-3">
+      <h2 id="name-encoding-strategy">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-encoding-strategy" class="section-name selfRef">Encoding Strategy</a>
+      </h2>
+<p id="section-3-1">Not all 128 bits of a UUID are data; rather, several bits are masked.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-3-2.1">
+          <p id="section-3-2.1.1">Up to three high bits in the following segment, called <code>var</code>, specify the variant of the UUID, which indicates the layout of the UUID and thus how it should be read.<a href="#section-3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="section-3-2.2">
+          <p id="section-3-2.2.1">Within the IETF and DCE variant, the top four bits of the third segment, known as <code>ver</code>, specify the UUID's version, which are fixed values that indicate the algorithm used to generate the UUID, and thus how it should be read.<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-3-3">UUID-NCName removes these two masked quartets and uses them as "bookends" <a href="#bookends" class="auto internal xref">Section 3.2</a> for the rest of the identifier, mapping them to the first sixteen symbols of the Base32 table <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span>, which are all letters.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">For the variant, round up to four bits, so that the bookend characters are always the same for a given UUID, regardless of the number of variant bits set.
+These "bookend" characters provide an analogous hint to a developer about the nature of the UUID, just as one can by inspecting the third and fourth segments of a canonical hexadecimal UUID representation.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">Next, bit-shift the remaining 120 bits to close the gaps of the two masked quartets previously removed.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">The resulting 120 bits divide evenly by both 5 (for Base32, yielding 24 symbols) and 6 (for Base64, yielding 20 symbols).<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">For Base58, note that the encoding cannot map to an even number of bits, but Base58 does not have the same concerns with regard to padding as Base32 and Base64.
+Indeed, in Base58 there is a different padding issue: some inputs yield shorter outputs than others.
+To address this, pad the Base58 representation by appending with underscore characters (<code>_</code>, a character <em>not</em> in the Base58 alphabet) to get a consistent length.
+The details are laid out in the <span><a href="#encoding" class="internal xref">encoding algorithm</a> (<a href="#encoding" class="auto internal xref">Section 4</a>)</span> section.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">Given the example UUID from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span>: <code>f81d4fae-7dec-11d0-a765-00a0c91e6bf6</code> the transformation yields the following results shown in <a href="#exampleTable" class="auto internal xref">Table 1</a>.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<span id="name-example-of-the-transformati"></span><div id="exampleTable">
+<table class="center" id="table-1">
+        <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-example-of-the-transformati" class="selfRef">Example of the transformation of a UUID to UUID-NCName representations</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Value</th>
+            <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+            <th class="text-left" rowspan="1" colspan="1">Properties</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+            <td class="text-left" rowspan="1" colspan="1">b7aou7lt55qoqoziauder427wk</td>
+            <td class="text-left" rowspan="1" colspan="1">26 Characters, case-insensitive</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+            <td class="text-left" rowspan="1" colspan="1">B7wc88dU4e3NyJEj3e944DK</td>
+            <td class="text-left" rowspan="1" colspan="1">23 Characters, case-sensitive</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+            <td class="text-left" rowspan="1" colspan="1">B-B1Prn3sHQdlAKDJHmv2K</td>
+            <td class="text-left" rowspan="1" colspan="1">22 Characters, case-sensitive</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="section-3-10">For more examples see the test vectors appendix: <a href="#testVectors" class="auto internal xref">Appendix B</a>.<a href="#section-3-10" class="pilcrow">¶</a></p>
+<div id="syntax">
+<section id="section-3.1">
+        <h3 id="name-syntax">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-syntax" class="section-name selfRef">Syntax</a>
+        </h3>
+<p id="section-3.1-1">Below is the ABNF grammar for the productions <code>uuid-ncname-32</code>, <code>uuid-ncname-58</code>, and <code>uuid-ncname-64</code>:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3.1-2">
+<pre>
+uuid-ncname-32 = bookend 24base32 bookend
+uuid-ncname-58 = bookend base58 bookend
+uuid-ncname-64 = bookend 20base64url bookend
+bookend        = %x41-50 / %x61-70 ; [A-Pa-p]
+base32         = %x32-37 / %x41-5a / %x61-7a ; [2-7A-Za-z]
+b58char        = %x31-39 / %x41-48 / %x4a-4e / %x50-5a /
+                 %x61-6c / %x6d-7a ; [1-9A-HJ-NP-Za-km-z]
+base58         = 15b58char 6"_" / 16b58char 5"_" /
+                 17b58char 4"_" / 18b58char 3"_" /
+                 19b58char 2"_" / 20b58char "_" / 21b58char
+                 ; (symbol sequence plus appropriate padding)
+base64url      = %x2d / %x30-39 / %x41-5a / %x5f / %x61-7a
+                 ; [-0-9A-Z_a-z]
+</pre><a href="#section-3.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="bookends">
+<section id="section-3.2">
+        <h3 id="name-bookends">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-bookends" class="section-name selfRef">Bookends</a>
+        </h3>
+<p id="section-3.2-1">"Bookends" are 4-bit sequences (nybbles, quartets, etc.) which are mapped directly onto the first sixteen symbols of the Base32 table from <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>], <a href="https://rfc-editor.org/rfc/rfc4648#section-6" class="relref">Section 6</a></span> [A-P].<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">This portion of the Base32 table is identical to that found in the Base64 Table <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>], <a href="https://rfc-editor.org/rfc/rfc4648#section-4" class="relref">Section 4</a></span>, though the term Base32 is used to underscore the fact that bookend characters are case-insensitive.
+This is because certain environments encode meaning into the case of the first character of a symbol, so it is important that its literal representation be flexible.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">However, there is little value in arbitrarily constraining the last character.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2-4">Nevertheless, UUID-NCName-32 symbols <span class="bcp14">SHOULD</span> be generated entirely lower-case, while UUID-NCName-58 and UUID-NCName-64 symbols <span class="bcp14">SHOULD</span> be generated with the bookend characters in upper-case.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2-5">Random UUIDs, UUIDv4, for instance, will always begin with <code>e/E</code>.
+For other versions from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4.2" class="relref">Section 4.2</a></span> refer to <a href="#bookendTable" class="auto internal xref">Table 2</a>.<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<span id="name-bookend-characters-for-uuid"></span><div id="bookendTable">
+<table class="center" id="table-2">
+          <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-bookend-characters-for-uuid" class="selfRef">Bookend Characters for UUID Versions</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">IETF/DCE Version</th>
+              <th class="text-left" rowspan="1" colspan="1">Bookend Character</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0,    0x00</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">a/A</td>
+              <td class="text-left" rowspan="1" colspan="1">Nil</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>1,    0x01</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">b/B</td>
+              <td class="text-left" rowspan="1" colspan="1">Gregorian Timestamp</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>2,    0x02</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">c/C</td>
+              <td class="text-left" rowspan="1" colspan="1">DCE "Security"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>3,    0x03</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">d/D</td>
+              <td class="text-left" rowspan="1" colspan="1">Name-Based MD5</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>4,    0x04</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">e/E</td>
+              <td class="text-left" rowspan="1" colspan="1">Random</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>5,    0x05</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">f/F</td>
+              <td class="text-left" rowspan="1" colspan="1">Name-Based SHA-1</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>6,    0x06</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">g/G</td>
+              <td class="text-left" rowspan="1" colspan="1">Reordered Gregorian Timestamp</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>7,    0x07</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">h/H</td>
+              <td class="text-left" rowspan="1" colspan="1">Unix Timestamp</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>8,    0x08</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">i/I</td>
+              <td class="text-left" rowspan="1" colspan="1">Custom</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>9-15, 0x09-0x0F</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">j-p/J-P</td>
+              <td class="text-left" rowspan="1" colspan="1">Reserved for Future definitions</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-3.2-7">Any UUID with the variant bits set as defined in <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4.1" class="relref">Section 4.1</a></span>, row 2 will always terminate with one of <code>i/I</code>, <code>j/J</code>, <code>k/K</code>, or <code>l/L</code>.
+Review <a href="#variantTable" class="auto internal xref">Table 3</a> for all possible variant bit combinations.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<span id="name-bookend-characters-for-uuid-"></span><div id="variantTable">
+<table class="center" id="table-3">
+          <caption>
+<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#name-bookend-characters-for-uuid-" class="selfRef">Bookend Characters for UUID Variants</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Variant Bits</th>
+              <th class="text-left" rowspan="1" colspan="1">Bookend Character</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0-7,     0b0000 - 0b0111</td>
+              <td class="text-left" rowspan="1" colspan="1">a-h/A-H</td>
+              <td class="text-left" rowspan="1" colspan="1">NCS and NIL UUID</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">8-9,A-B, 0b1000 - 0b1011</td>
+              <td class="text-left" rowspan="1" colspan="1">i-l/I-L</td>
+              <td class="text-left" rowspan="1" colspan="1">IETF, DCE, and Others</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">C-D,     0b1100 - 0b1101</td>
+              <td class="text-left" rowspan="1" colspan="1">m-n/M-N</td>
+              <td class="text-left" rowspan="1" colspan="1">Microsoft</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">E-F,     0b1110 - 0b1111</td>
+              <td class="text-left" rowspan="1" colspan="1">o-p/O-P</td>
+              <td class="text-left" rowspan="1" colspan="1">Reserved and MAX UUID</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-3.2-9">An example version/variant bookend layout for UUIDv4 follows the table where "M" represents the version placement for the BaseXX representation of 0x4 (0b0100) and "N" represents the variant placement for one of the four possible hexadecimal representations of variant 10xx: 0x8 (0b1000), 0x9 (0b1001), 0xA (0b1010), 0xB (0b1011) as its Base32, Base64, or Base58 symbol (<code>i/I</code>, <code>j/J</code>, <code>k/K</code>, or <code>l/L</code>)<a href="#section-3.2-9" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-bookend-layout-"></span><figure id="figure-1">
+          <div class="alignLeft art-text artwork" id="section-3.2-10.1">
+<pre>
+// UUID-NCName-32
+e000000000000000000000000i
+e000000000000000000000000l
+e000000000000000000000000j
+e000000000000000000000000k
+MxxxxxxxxxxxxxxxxxxxxxxxxN
+
+// UUID-NCName-58
+E000000000000000000000I
+E000000000000000000000J
+E000000000000000000000K
+E000000000000000000000L
+MxxxxxxxxxxxxxxxxxxxxxN
+
+// UUID-NCName-64
+E00000000000000000000I
+E00000000000000000000J
+E00000000000000000000K
+E00000000000000000000L
+MxxxxxxxxxxxxxxxxxxxxN
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-uuid-ncname-bookend-layout-" class="selfRef">UUID-NCName Bookend Layout for UUIDv4</a>
+          </figcaption></figure>
+<p id="section-3.2-11">Another example can be seen in <a href="#nilTestVectors" class="auto internal xref">Appendix B.2</a> for the nil UUID, which has all bits set to zero, and thus has the bookend characters <code>a/A</code> for both version and variant and for <a href="#maxTestVectors" class="auto internal xref">Appendix B.3</a> for the MAX UUID, which has all bits set to one, and thus has the bookend characters <code>p/P</code> for both version and variant.<a href="#section-3.2-11" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="detection">
+<section id="section-3.3">
+        <h3 id="name-detection-heuristic">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-detection-heuristic" class="section-name selfRef">Detection Heuristic</a>
+        </h3>
+<p id="section-3.3-1">It is possible to heuristically determine whether a given string is a UUID-NCName symbol, and if so, which encoding it uses.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">All encodings of UUID-NCName are a fixed length:<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-3.3-3.1">
+            <p id="section-3.3-3.1.1">UUID-NCName-32 is always 26 characters.<a href="#section-3.3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="compact" id="section-3.3-3.2">
+            <p id="section-3.3-3.2.1">UUID-NCName-58 is always 23 characters.<a href="#section-3.3-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="compact" id="section-3.3-3.3">
+            <p id="section-3.3-3.3.1">UUID-NCName-64 is always 22 characters.<a href="#section-3.3-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.3-4">All encodings employ the same "bookend" mechanism.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-5">The first and last character in all three representations will therefore always be the same, modulo case, for a given UUID.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
+<p id="section-3.3-6">Furthermore, since these "bookend" characters represent the version and variant bits, they will correspond to predictable values.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-7">Given these facts, any UUID-NCName representation <span class="bcp14">MAY</span> be captured (and its "bookends" separated) using the following regular expression:<a href="#section-3.3-7" class="pilcrow">¶</a></p>
+<div class="lang-perl sourcecode" id="section-3.3-8">
+<pre>
+/\b([A-Pa-p]) # zero-width boundary and version bookend
+([2-7A-Za-z]{24}|[-0-9A-Z_a-z]{20}| # base32 and base64
+  (?:[1-9A-HJ-NP-Za-km-z]{15}_{6}|[1-9A-HJ-NP-Za-km-z]{16}_{5}|
+     [1-9A-HJ-NP-Za-km-z]{17}_{4}|[1-9A-HJ-NP-Za-km-z]{18}___|
+     [1-9A-HJ-NP-Za-km-z]{19}__|[1-9A-HJ-NP-Za-km-z]{20}_|
+     [1-9A-HJ-NP-Za-km-z]{21})) # base58 with underscore pad
+([A-Pa-p])\b/x # variant bookend and zero-width boundary
+</pre><a href="#section-3.3-8" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3-9">This detection method is considered a heuristic because it is possible to identify false-positive matches in random strings of text, just as
+it would be with a canonical UUID representation.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
+<p id="section-3.3-10">It is assumed that there would be sufficient enough context to positively identify these alternative UUID representations in the wild.<a href="#section-3.3-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="equivalency">
+<section id="section-3.4">
+        <h3 id="name-equivalency">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-equivalency" class="section-name selfRef">Equivalency</a>
+        </h3>
+<p id="section-3.4-1">Two UUID-NCName symbols are necessarily identical if they convert to the same (canonical) UUID.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">Two UUID-NCName-32 symbols are identical if their string values match when normalized to either all upper- or lower-case letters.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.4-3">Two UUID-NCName-58 or UUID-NCName-64 symbols are identical if their string values match when all characters, including the "bookend" characters, are normalized to either upper- or lower-case.<a href="#section-3.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="encoding">
+<section id="section-4">
+      <h2 id="name-encoding-algorithm">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-encoding-algorithm" class="section-name selfRef">Encoding Algorithm</a>
+      </h2>
+<p id="section-4-1">These are algorithms for encoding and decoding the symbols, transforming them to and from the canonical UUID representation.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">Equivalent algorithms no doubt exist, but these are the ones used in the <span><a href="#implementations" class="internal xref">reference implementations</a> (<a href="#implementations" class="auto internal xref">Appendix C</a>)</span>.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<div id="bitShifting">
+<section id="section-4.1">
+        <h3 id="name-bit-shifting-algorithm">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-bit-shifting-algorithm" class="section-name selfRef">Bit Shifting Algorithm</a>
+        </h3>
+<p id="section-4.1-1">First apply the shifting algorithm:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.1-2">
+<li id="section-4.1-2.1">
+            <p id="section-4.1-2.1.1">Convert the UUID to a binary string <code>bin</code>.<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1">Convert <code>bin</code> to an array of four 32-bit unsigned network-endian integers <code>ints</code>.<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.3">
+            <p id="section-4.1-2.3.1">Extract <code>version</code> as <code>(ints[1] &amp; 0x0000f000) &gt;&gt; 12</code>.<a href="#section-4.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.4">
+            <p id="section-4.1-2.4.1">Extract <code>variant</code> as <code>(ints[2] &amp; 0xf0000000) &gt;&gt; 24</code>.<a href="#section-4.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.5">
+            <p id="section-4.1-2.5.1">Assign <code>ints[1] = (ints[1] &amp; 0xffff0000) | ((ints[1] &amp; 0x00000fff) &lt;&lt; 4) | ((ints[2] &amp; 0x0fffffff) &gt;&gt; 24)</code>.<a href="#section-4.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.6">
+            <p id="section-4.1-2.6.1">Assign <code>ints[2] = (ints[2] &amp; 0x00ffffff) &lt;&lt; 8 | (ints[3] &gt;&gt; 24)</code>.<a href="#section-4.1-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.7">
+            <p id="section-4.1-2.7.1">Assign <code>ints[3] = (ints[3] &lt;&lt; 8) | variant</code>.<a href="#section-4.1-2.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.8">
+            <p id="section-4.1-2.8.1">Convert <code>ints</code> back into a binary string and return it along with the <code>version</code>.<a href="#section-4.1-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.1-3">Pseudocode for these steps using the Generic UUID from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span> as an example can be found in <a href="#bitShiftExample" class="auto internal xref">Appendix A.1</a>.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uuid-ncname-32-base32">
+<section id="section-4.2">
+        <h3 id="name-uuid-ncname-32-base32">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-uuid-ncname-32-base32" class="section-name selfRef">UUID-NCName-32 (Base32)</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-4.2-1">
+<li id="section-4.2-1.1">
+            <p id="section-4.2-1.1.1">Take the binary string <code>bin</code> and shift the last octet to the right by one bit.<a href="#section-4.2-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-1.2">
+            <p id="section-4.2-1.2.1">Encode <code>bin</code> with the Base32 algorithm to get the string <code>b32</code>.<a href="#section-4.2-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-1.3">
+            <p id="section-4.2-1.3.1">Truncate <code>b32</code> to 25 characters, removing any padding.<a href="#section-4.2-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-1.4">
+            <p id="section-4.2-1.4.1">Convert <code>version</code> to its value in the Base32 table.<a href="#section-4.2-1.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-1.5">
+            <p id="section-4.2-1.5.1">Return <code>version</code> concatenated to <code>b32</code>, optionally in either upper or lower case.<a href="#section-4.2-1.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.2-2">Pseudocode for these steps using the Generic UUID from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span> as an example can be found in <a href="#uuidNcname32Example" class="auto internal xref">Appendix A.2.1</a>.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uuid-ncname-58-base58">
+<section id="section-4.3">
+        <h3 id="name-uuid-ncname-58-base58">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-uuid-ncname-58-base58" class="section-name selfRef">UUID-NCName-58 (Base58)</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-4.3-1">
+<li id="section-4.3-1.1">
+            <p id="section-4.3-1.1.1">Remove the last octet from the binary string <code>bin</code>, convert it to an integer and assign it to <code>variant</code>.<a href="#section-4.3-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-1.2">
+            <p id="section-4.3-1.2.1">Shift <code>variant</code> to the right by 4 bits, and convert it to its value in the Base32 table.<a href="#section-4.3-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-1.3">
+            <p id="section-4.3-1.3.1">Encode the remaining <code>bin</code> with the Base58 algorithm to get the string <code>b58</code>.<a href="#section-4.3-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-1.4">
+            <p id="section-4.3-1.4.1">If <code>b58</code> is less than 21 characters long, append underscores (<code>_</code>) until it is.<a href="#section-4.3-1.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-1.5">
+            <p id="section-4.3-1.5.1">Convert <code>version</code> to its value in the Base32 table.<a href="#section-4.3-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-1.6">
+            <p id="section-4.3-1.6.1">Return the concatenation of <code>version</code>, <code>b58</code>, and <code>variant</code>.<a href="#section-4.3-1.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.3-2">Pseudocode for these steps using the Generic UUID from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span> as an example can be found in <a href="#uuidNcname58Example" class="auto internal xref">Appendix A.2.2</a>.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uuid-ncname-64-base64url">
+<section id="section-4.4">
+        <h3 id="name-uuid-ncname-64-base64url">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-uuid-ncname-64-base64url" class="section-name selfRef">UUID-NCName-64 (Base64url)</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-4.4-1">
+<li id="section-4.4-1.1">
+            <p id="section-4.4-1.1.1">Take the binary string <code>bin</code> and shift the last octet to the right by two bits.<a href="#section-4.4-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-1.2">
+            <p id="section-4.4-1.2.1">Encode <code>bin</code> with the base64url algorithm to get the string <code>b64</code>.<a href="#section-4.4-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-1.3">
+            <p id="section-4.4-1.3.1">Truncate <code>b64</code> to 21 characters, removing any padding.<a href="#section-4.4-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-1.4">
+            <p id="section-4.4-1.4.1">Convert <code>version</code> to its value in the Base32 table.<a href="#section-4.4-1.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-1.5">
+            <p id="section-4.4-1.5.1">Return <code>version</code> concatenated to <code>b64</code>.<a href="#section-4.4-1.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.4-2">Pseudocode for these steps using the Generic UUID from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span> as an example can be found in <a href="#uuidNcname64Example" class="auto internal xref">Appendix A.2.3</a>.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="decoding">
+<section id="section-5">
+      <h2 id="name-decoding-algorithm">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-decoding-algorithm" class="section-name selfRef">Decoding Algorithm</a>
+      </h2>
+<ol start="1" type="1" class="normal type-1" id="section-5-1">
+<li id="section-5-1.1">
+          <p id="section-5-1.1.1">First use the <a href="#detection" class="internal xref">Detection Heuristic</a> to determine whether the symbol <code>ncname</code> is Base32, Base58, or Base64.<a href="#section-5-1.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-1.2">
+          <p id="section-5-1.2.1">Remove the first character of the symbol <code>ncname</code> and convert it into an integer according to the Base32 spec; call that integer <code>version</code>.<a href="#section-5-1.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-1.3">
+          <p id="section-5-1.3.1">If <code>ncname</code> is Base58:<a href="#section-5-1.3.1" class="pilcrow">¶</a></p>
+<ol start="1" type="a" class="normal type-a" id="section-5-1.3.2">
+<li id="section-5-1.3.2.1">
+              <p id="section-5-1.3.2.1.1">Remove the last character and decode it to an integer according to the Base32 spec; call that integer <code>variant</code>.<a href="#section-5-1.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.3.2.2">
+              <p id="section-5-1.3.2.2.1">Shift <code>variant</code> four bits to the left.<a href="#section-5-1.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.3.2.3">
+              <p id="section-5-1.3.2.3.1">Remove all trailing underscores from the remainder of <code>ncname</code>.<a href="#section-5-1.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.3.2.4">
+              <p id="section-5-1.3.2.4.1">Decode the remainder of <code>ncname</code> with the Base58 algorithm as <code>bin</code>.<a href="#section-5-1.3.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.3.2.5">
+              <p id="section-5-1.3.2.5.1">Append the octet corresponding to the value of <code>variant</code> to <code>bin</code>.<a href="#section-5-1.3.2.5.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</li>
+        <li id="section-5-1.4">
+          <p id="section-5-1.4.1">Otherwise:<a href="#section-5-1.4.1" class="pilcrow">¶</a></p>
+<ol start="1" type="a" class="normal type-a" id="section-5-1.4.2">
+<li id="section-5-1.4.2.1">
+              <p id="section-5-1.4.2.1.1">If <code>ncname</code> is Base64, and the last character is lowercase, set it to uppercase.<a href="#section-5-1.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.4.2.2">
+              <p id="section-5-1.4.2.2.1">Append padding if necessary to satisfy the decoder, <code>A======</code> for Base32 and <code>A==</code> for Base64.<a href="#section-5-1.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.4.2.3">
+              <p id="section-5-1.4.2.3.1">Decode the remainder of <code>ncname</code> by either the <code>base32</code> or <code>base64url</code> decoding algorithm into binary string <code>bin</code>.<a href="#section-5-1.4.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5-1.4.2.4">
+              <p id="section-5-1.4.2.4.1">If <code>ncname</code> is Base32, shift the last octet of <code>bin</code> one bit to the left; if Base64 shift it two bits.<a href="#section-5-1.4.2.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</li>
+      </ol>
+<p id="section-5-2">Then, apply the shifting algorithm in reverse:<a href="#section-5-2" class="pilcrow">¶</a></p>
+<ol start="5" type="1" class="normal type-1" id="section-5-3">
+<li id="section-5-3.1">
+          <p id="section-5-3.1.1">Ensure <code>version &amp;= 0xf</code> so it is in the range of 0-15.<a href="#section-5-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.2">
+          <p id="section-5-3.2.1">Convert the binary string <code>bin</code> into an array of four 32-bit unsigned network-endian integers <code>ints</code>.<a href="#section-5-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.3">
+          <p id="section-5-3.3.1">Assign <code>variant = (ints[3] &amp; 0xf0) &lt;&lt; 24</code>.<a href="#section-5-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.4">
+          <p id="section-5-3.4.1">Shift and assign <code>ints[3] &gt;&gt;= 8</code>.<a href="#section-5-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.5">
+          <p id="section-5-3.5.1">Union and assign <code>ints[3] |= ((ints[2] &amp; 0xff) &lt;&lt; 24)</code>.<a href="#section-5-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.6">
+          <p id="section-5-3.6.1">Shift and assign <code>ints[2] &gt;&gt;= 8</code>.<a href="#section-5-3.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.7">
+          <p id="section-5-3.7.1">Union and assign <code>ints[2] |= ((ints[1] &amp; 0xf) &lt;&lt; 24) | variant</code>.<a href="#section-5-3.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.8">
+          <p id="section-5-3.8.1">Assign <code>ints[1] = (ints[1] &amp; 0xffff0000) | (version &lt;&lt; 12) | ((ints[1] &gt;&gt; 4) &amp; 0xfff)</code>.<a href="#section-5-3.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.9">
+          <p id="section-5-3.9.1">Convert <code>ints</code> back into the new binary string <code>bin</code>.<a href="#section-5-3.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-5-3.10">
+          <p id="section-5-3.10.1">Format <code>bin</code> as a canonical UUID.<a href="#section-5-3.10.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="iana">
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-6-1">There are no discernible IANA considerations associated with this specification.<a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-7-1">As UUID-NCName symbols are isomorphic to their canonical UUID representations, the security considerations for these symbols are also the same as <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>]</span>.<a href="#section-7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-8">
+      <h2 id="name-references">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-8.1">
+        <h3 id="name-normative-references">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="Base58">[Base58]</dt>
+        <dd>
+<span class="refAuthor">Bitcoin</span>, <span class="refTitle">"Base58 Bitcoin"</span>, <span class="seriesInfo">commit fae71d3</span>, <time datetime="2008-11" class="refDate">November 2008</time>, <span>&lt;<a href="https://github.com/bitcoin/bitcoin/blob/master/src/base58.cpp">https://github.com/bitcoin/bitcoin/blob/master/src/base58.cpp</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4648">[RFC4648]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9562">[RFC9562]</dt>
+      <dd>
+<span class="refAuthor">Davis, K.</span>, <span class="refAuthor">Peabody, B.</span>, and <span class="refAuthor">P. Leach</span>, <span class="refTitle">"Universally Unique IDentifiers (UUIDs)"</span>, <span class="seriesInfo">RFC 9562</span>, <span class="seriesInfo">DOI 10.17487/RFC9562</span>, <time datetime="2024-05" class="refDate">May 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9562">https://www.rfc-editor.org/rfc/rfc9562</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-8.2">
+        <h3 id="name-informative-references">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="XML-NAMES">[XML-NAMES]</dt>
+      <dd>
+<span class="refAuthor">Bray, T.</span>, <span class="refAuthor">Hollander, D.</span>, <span class="refAuthor">Layman, A.</span>, <span class="refAuthor">Tobin, R.</span>, and <span class="refAuthor">H S Thompson</span>, <span class="refTitle">"Namespaces in XML 1.0 (Third Edition)"</span>, <time datetime="2009-12" class="refDate">December 2009</time>, <span>&lt;<a href="https://www.w3.org/TR/2009/REC-xml-names-20091208/">https://www.w3.org/TR/2009/REC-xml-names-20091208/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="pseudocode">
+<section id="appendix-A">
+      <h2 id="name-pseudocode">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-pseudocode" class="section-name selfRef">Pseudocode</a>
+      </h2>
+<p id="appendix-A-1">Given the example UUID from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span>: <code>f81d4fae-7dec-11d0-a765-00a0c91e6bf6</code> (int:<code>329800735698586629295641978511506172918</code>) illustrating step by step the algorithms described in <a href="#encoding" class="internal xref">Encoding Algorithm</a> and <a href="#decoding" class="internal xref">Decoding Algorithm</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<div id="bitShiftExample">
+<section id="appendix-A.1">
+        <h3 id="name-bit-shifting-example">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-bit-shifting-example" class="section-name selfRef">Bit Shifting Example</a>
+        </h3>
+<p id="appendix-A.1-1">The bit shifting algorithm from <a href="#bitShifting" class="auto internal xref">Section 4.1</a> is used to remove the version and variant bits, and to shift the remaining 120 bits to be contiguous, so that they can be encoded with the Base32, Base58, or Base64 algorithms.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-bit-shifting-ex"></span><table class="center" id="table-4">
+          <caption>
+<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#name-uuid-ncname-bit-shifting-ex" class="selfRef">UUID-NCName Bit Shifting Example for RFC9562, Section 4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Step</th>
+              <th class="text-left" rowspan="1" colspan="1">Operation</th>
+              <th class="text-left" rowspan="1" colspan="1">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">UUID int to 16-byte big-endian</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae7dec11d0a76500a0c91e6bf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Unpack as 4 × uint32 BE</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>[0xf81d4fae, 0x7dec11d0, 0xa76500a0, 0xc91e6bf6]</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3</td>
+              <td class="text-left" rowspan="1" colspan="1">Extract version <code>(ints[1] &amp; 0xf000) &gt;&gt; 12</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <strong>1</strong> to bookend <code>B</code>/<code>b</code> (UUIDv1)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4</td>
+              <td class="text-left" rowspan="1" colspan="1">Extract variant <code>(ints[2] &amp; 0xf0000000) &gt;&gt; 24</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <strong>0xa0</strong> to nybble <code>0xa</code> → bookend <code>K</code>/<code>k</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">5</td>
+              <td class="text-left" rowspan="1" colspan="1">Rebuild <code>ints[1]</code>: close version gap, pull 4 bits from <code>ints[2]</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0x7dec1d07</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">6</td>
+              <td class="text-left" rowspan="1" colspan="1">Rebuild <code>ints[2]</code>: close variant gap, pull 8 bits from <code>ints[3]</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0x6500a0c9</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">7</td>
+              <td class="text-left" rowspan="1" colspan="1">Rebuild <code>ints[3]</code>: shift left 8, OR in variant byte</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0x1e6bf6a0</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">8</td>
+              <td class="text-left" rowspan="1" colspan="1">Pack back to binary</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae7dec1d076500a0c91e6bf6a0</code>, version=1 (<code>B</code>/<code>b</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="appendix-A.1-3">The shifted 128-bit binary now has the 120 data bits contiguous (version and variant gaps removed), with the variant byte tucked into the trailing position.<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="encoding-example">
+<section id="appendix-A.2">
+        <h3 id="name-encoding-example">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-encoding-example" class="section-name selfRef">Encoding Example</a>
+        </h3>
+<p id="appendix-A.2-1">The encoding algorithms from <a href="#encoding" class="auto internal xref">Section 4</a> are applied to the shifted binary from the previous example to produce the UUID-NCName representations found in <a href="#genericTestVector" class="auto internal xref">Appendix B.1</a>.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<div id="uuidNcname32Example">
+<section id="appendix-A.2.1">
+          <h4 id="name-uuid-ncname-32-example">
+<a href="#appendix-A.2.1" class="section-number selfRef">A.2.1. </a><a href="#name-uuid-ncname-32-example" class="section-name selfRef">UUID-NCName-32 Example</a>
+          </h4>
+<span id="name-uuid-ncname-32-example-for-"></span><table class="center" id="table-5">
+            <caption>
+<a href="#table-5" class="selfRef">Table 5</a>:
+<a href="#name-uuid-ncname-32-example-for-" class="selfRef">UUID-NCName-32 Example for RFC9562, Section 4</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Step</th>
+                <th class="text-left" rowspan="1" colspan="1">Operation</th>
+                <th class="text-left" rowspan="1" colspan="1">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">Last octet <code>0xa0</code> &gt;&gt; 1</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>0x50</code> → bin becomes <code>...f650</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+                <td class="text-left" rowspan="1" colspan="1">Base32 encode</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>7AOU7LT55QOQOZIAUDER427WKA======</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">3</td>
+                <td class="text-left" rowspan="1" colspan="1">Truncate to 25 chars</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>7AOU7LT55QOQOZIAUDER427WK</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">Version → Base32 char</td>
+                <td class="text-left" rowspan="1" colspan="1">1 → <code>B</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">5</td>
+                <td class="text-left" rowspan="1" colspan="1">Prepend version, lowercase</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <strong><code>b7aou7lt55qoqoziauder427wk</code></strong> (26 chars)</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+<div id="uuidNcname58Example">
+<section id="appendix-A.2.2">
+          <h4 id="name-uuid-ncname-58-example">
+<a href="#appendix-A.2.2" class="section-number selfRef">A.2.2. </a><a href="#name-uuid-ncname-58-example" class="section-name selfRef">UUID-NCName-58 Example</a>
+          </h4>
+<span id="name-uuid-ncname-58-example-for-"></span><table class="center" id="table-6">
+            <caption>
+<a href="#table-6" class="selfRef">Table 6</a>:
+<a href="#name-uuid-ncname-58-example-for-" class="selfRef">UUID-NCName-58 Example for RFC9562, Section 4</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Step</th>
+                <th class="text-left" rowspan="1" colspan="1">Operation</th>
+                <th class="text-left" rowspan="1" colspan="1">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">Remove last octet → variant</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>0xa0</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+                <td class="text-left" rowspan="1" colspan="1">variant <code>0xa0</code> &gt;&gt; 4 → Base32 char</td>
+                <td class="text-left" rowspan="1" colspan="1">10 → <code>K</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">3</td>
+                <td class="text-left" rowspan="1" colspan="1">Base58 encode remaining 15 bytes</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>7wc88dU4e3NyJEj3e944D</code> (21 chars)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">Pad to 21 chars with <code>_</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Already 21, no padding needed</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">5</td>
+                <td class="text-left" rowspan="1" colspan="1">Version → Base32 char</td>
+                <td class="text-left" rowspan="1" colspan="1">1 → <code>B</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">6</td>
+                <td class="text-left" rowspan="1" colspan="1">Concatenate ver + b58 + var</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <strong><code>B7wc88dU4e3NyJEj3e944DK</code></strong> (23 chars)</td>
+              </tr>
+            </tbody>
+          </table>
+<p id="appendix-A.2.2-2">The following table illustrates the same steps for the UUIDv7 example from <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.6" class="relref">Appendix A.6</a></span>: <code>017F22E2-79B0-7CC3-98C4-DC0C0C07398F</code>, whose shifted binary is <code>017f22e279b0cc38c4dc0c0c07398f90</code>. This example demonstrates underscore (_) padding and its application for Base58 encodings that are not 21 characters long.<a href="#appendix-A.2.2-2" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-58-example-with"></span><table class="center" id="table-7">
+            <caption>
+<a href="#table-7" class="selfRef">Table 7</a>:
+<a href="#name-uuid-ncname-58-example-with" class="selfRef">UUID-NCName-58 Example with Padding for RFC9562, Section A.6</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Step</th>
+                <th class="text-left" rowspan="1" colspan="1">Operation</th>
+                <th class="text-left" rowspan="1" colspan="1">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">Remove last octet → variant</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>0x90</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+                <td class="text-left" rowspan="1" colspan="1">variant <code>0x90</code> &gt;&gt; 4 → Base32 char</td>
+                <td class="text-left" rowspan="1" colspan="1">9 → <code>J</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">3</td>
+                <td class="text-left" rowspan="1" colspan="1">Base58 encode remaining 15 bytes</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>3RrXaX7uTM6qdwrXwpC6</code> (20 chars)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">Pad to 21 chars with <code>_</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>3RrXaX7uTM6qdwrXwpC6_</code> (1 underscore appended)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">5</td>
+                <td class="text-left" rowspan="1" colspan="1">Version → Base32 char</td>
+                <td class="text-left" rowspan="1" colspan="1">7 → <code>H</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">6</td>
+                <td class="text-left" rowspan="1" colspan="1">Concatenate ver + b58 + var</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <strong><code>H3RrXaX7uTM6qdwrXwpC6_J</code></strong> (23 chars)</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+<div id="uuidNcname64Example">
+<section id="appendix-A.2.3">
+          <h4 id="name-uuid-ncname-64-example">
+<a href="#appendix-A.2.3" class="section-number selfRef">A.2.3. </a><a href="#name-uuid-ncname-64-example" class="section-name selfRef">UUID-NCName-64 Example</a>
+          </h4>
+<span id="name-uuid-ncname-64-example-for-"></span><table class="center" id="table-8">
+            <caption>
+<a href="#table-8" class="selfRef">Table 8</a>:
+<a href="#name-uuid-ncname-64-example-for-" class="selfRef">UUID-NCName-64 Example for RFC9562, Section 4</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Step</th>
+                <th class="text-left" rowspan="1" colspan="1">Operation</th>
+                <th class="text-left" rowspan="1" colspan="1">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">Last octet <code>0xa0</code> &gt;&gt; 2</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>0x28</code> → bin becomes <code>...f628</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+                <td class="text-left" rowspan="1" colspan="1">Base64url encode</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>-B1Prn3sHQdlAKDJHmv2KA==</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">3</td>
+                <td class="text-left" rowspan="1" colspan="1">Truncate to 21 chars</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>-B1Prn3sHQdlAKDJHmv2K</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">Version → Base32 char</td>
+                <td class="text-left" rowspan="1" colspan="1">1 → <code>B</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">5</td>
+                <td class="text-left" rowspan="1" colspan="1">Prepend version</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <strong><code>B-B1Prn3sHQdlAKDJHmv2K</code></strong> (22 chars)</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+</section>
+</div>
+<div id="decodingExample">
+<section id="appendix-A.3">
+        <h3 id="name-decoding-example">
+<a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-decoding-example" class="section-name selfRef">Decoding Example</a>
+        </h3>
+<p id="appendix-A.3-1">Given the examples from the previous sections, decoding each can be illustrated as follows.<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.3-2">UUID-NCName-32: <code>b7aou7lt55qoqoziauder427wk</code><a href="#appendix-A.3-2" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-32-decode-examp"></span><table class="center" id="table-9">
+          <caption>
+<a href="#table-9" class="selfRef">Table 9</a>:
+<a href="#name-uuid-ncname-32-decode-examp" class="selfRef">UUID-NCName-32 Decode Example for RFC9562, Section 4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Step</th>
+              <th class="text-left" rowspan="1" colspan="1">Operation</th>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Length = 26</td>
+              <td class="text-left" rowspan="1" colspan="1">Base32 Encoding</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Remove first char → version</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>b</code> → 1</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4b</td>
+              <td class="text-left" rowspan="1" colspan="1">Append padding <code>A======</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>7AOU7LT55QOQOZIAUDER427WKA======</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4c</td>
+              <td class="text-left" rowspan="1" colspan="1">Base32 decode</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae7dec1d076500a0c91e6bf650</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4d</td>
+              <td class="text-left" rowspan="1" colspan="1">Last octet <code>0x50</code> &lt;&lt; 1</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0xa0</code> → shifted binary <code>...f6a0</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="appendix-A.3-4">UUID-NCName-58: <code>B7wc88dU4e3NyJEj3e944DK</code><a href="#appendix-A.3-4" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-58-decode-examp"></span><table class="center" id="table-10">
+          <caption>
+<a href="#table-10" class="selfRef">Table 10</a>:
+<a href="#name-uuid-ncname-58-decode-examp" class="selfRef">UUID-NCName-58 Decode Example for RFC9562, Section 4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Step</th>
+              <th class="text-left" rowspan="1" colspan="1">Operation</th>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Length = 23</td>
+              <td class="text-left" rowspan="1" colspan="1">Base58 Encoding</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Remove first char → version</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>B</code> → 1</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3a</td>
+              <td class="text-left" rowspan="1" colspan="1">Remove last char → variant</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>K</code> → 10 (<code>0xa</code>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3b</td>
+              <td class="text-left" rowspan="1" colspan="1">variant &lt;&lt; 4</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0xa0</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3c</td>
+              <td class="text-left" rowspan="1" colspan="1">Strip trailing underscores</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>7wc88dU4e3NyJEj3e944D</code> (none removed)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3d</td>
+              <td class="text-left" rowspan="1" colspan="1">Base58 decode (15 bytes)</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae7dec1d076500a0c91e6bf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3e</td>
+              <td class="text-left" rowspan="1" colspan="1">Append variant octet <code>0xa0</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">shifted binary <code>...f6a0</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="appendix-A.3-6">UUID-NCName-64: <code>B-B1Prn3sHQdlAKDJHmv2K</code><a href="#appendix-A.3-6" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-64-decode-examp"></span><table class="center" id="table-11">
+          <caption>
+<a href="#table-11" class="selfRef">Table 11</a>:
+<a href="#name-uuid-ncname-64-decode-examp" class="selfRef">UUID-NCName-64 Decode Example for RFC9562, Section 4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Step</th>
+              <th class="text-left" rowspan="1" colspan="1">Operation</th>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Length = 22</td>
+              <td class="text-left" rowspan="1" colspan="1">Base64 Encoding</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Remove first char → version</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>B</code> → 1</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4a</td>
+              <td class="text-left" rowspan="1" colspan="1">Last char <code>K</code> already uppercase</td>
+              <td class="text-left" rowspan="1" colspan="1">no change</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4b</td>
+              <td class="text-left" rowspan="1" colspan="1">Append padding <code>A==</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>-B1Prn3sHQdlAKDJHmv2KA==</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4c</td>
+              <td class="text-left" rowspan="1" colspan="1">Base64url decode</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae7dec1d076500a0c91e6bf628</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4d</td>
+              <td class="text-left" rowspan="1" colspan="1">Last octet <code>0x28</code> &lt;&lt; 2</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0xa0</code> → shifted binary <code>...f6a0</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="appendix-A.3-8">All three produce shifted binary <code>f81d4fae7dec1d076500a0c91e6bf6a0</code> with version=1.<a href="#appendix-A.3-8" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-reverse-bit-shi"></span><table class="center" id="table-12">
+          <caption>
+<a href="#table-12" class="selfRef">Table 12</a>:
+<a href="#name-uuid-ncname-reverse-bit-shi" class="selfRef">UUID-NCName Reverse Bit Shifting Example for RFC9562, Section 4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Step</th>
+              <th class="text-left" rowspan="1" colspan="1">Operation</th>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">5</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>version &amp;= 0xf</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">6</td>
+              <td class="text-left" rowspan="1" colspan="1">Unpack 4 × uint32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>[0xf81d4fae, 0x7dec1d07, 0x6500a0c9, 0x1e6bf6a0]</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">7</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>variant = (ints[3] &amp; 0xf0) &lt;&lt; 24</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0xa0000000</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">8</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ints[3] &gt;&gt;= 8</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0x001e6bf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">9</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ints[3] \|= (ints[2] &amp; 0xff) &lt;&lt; 24</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0xc91e6bf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">10</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ints[2] &gt;&gt;= 8</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0x006500a0</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">11</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ints[2] \|= (ints[1] &amp; 0xf) &lt;&lt; 24 \| variant</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0xa76500a0</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">12</td>
+              <td class="text-left" rowspan="1" colspan="1">Restore version into <code>ints[1]</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>0x7dec11d0</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">13</td>
+              <td class="text-left" rowspan="1" colspan="1">Pack to binary</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae7dec11d0a76500a0c91e6bf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">14</td>
+              <td class="text-left" rowspan="1" colspan="1">Format UUID</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <strong><code>f81d4fae-7dec-11d0-a765-00a0c91e6bf6</code></strong>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+</section>
+</div>
+<div id="testVectors">
+<section id="appendix-B">
+      <h2 id="name-test-vectors">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
+      </h2>
+<p id="appendix-B-1">The test vectors use the same UUIDs and illustrative examples as RFC9562 to illustrate the transformation of UUIDs to UUID-NCName representations.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<div id="genericTestVector">
+<section id="appendix-B.1">
+        <h3 id="name-generic-uuid">
+<a href="#appendix-B.1" class="section-number selfRef">B.1. </a><a href="#name-generic-uuid" class="section-name selfRef">Generic UUID</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-fo"></span><table class="center" id="table-13">
+          <caption>
+<a href="#table-13" class="selfRef">Table 13</a>:
+<a href="#name-uuid-ncname-test-vectors-fo" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section 4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-4" class="relref">Section 4</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f81d4fae-7dec-11d0-a765-00a0c91e6bf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>b7aou7lt55qoqoziauder427wk</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>B7wc88dU4e3NyJEj3e944DK</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>B-B1Prn3sHQdlAKDJHmv2K</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="nilTestVectors">
+<section id="appendix-B.2">
+        <h3 id="name-nil-uuid">
+<a href="#appendix-B.2" class="section-number selfRef">B.2. </a><a href="#name-nil-uuid" class="section-name selfRef">NIL UUID</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for"></span><table class="center" id="table-14">
+          <caption>
+<a href="#table-14" class="selfRef">Table 14</a>:
+<a href="#name-uuid-ncname-test-vectors-for" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section 5.9</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-5.9" class="relref">Section 5.9</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>00000000-0000-0000-0000-000000000000</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>aaaaaaaaaaaaaaaaaaaaaaaaaa</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>A111111111111111______A</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>AAAAAAAAAAAAAAAAAAAAAA</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="maxTestVectors">
+<section id="appendix-B.3">
+        <h3 id="name-max-uuid">
+<a href="#appendix-B.3" class="section-number selfRef">B.3. </a><a href="#name-max-uuid" class="section-name selfRef">MAX UUID</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-"></span><table class="center" id="table-15">
+          <caption>
+<a href="#table-15" class="selfRef">Table 15</a>:
+<a href="#name-uuid-ncname-test-vectors-for-" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section 5.10</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#section-5.10" class="relref">Section 5.10</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>p777777777777777777777777p</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>P8AQGAut7N92awznwCnjuQP</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>P____________________P</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv1">
+<section id="appendix-B.4">
+        <h3 id="name-uuidv1">
+<a href="#appendix-B.4" class="section-number selfRef">B.4. </a><a href="#name-uuidv1" class="section-name selfRef">UUIDv1</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-r"></span><table class="center" id="table-16">
+          <caption>
+<a href="#table-16" class="selfRef">Table 16</a>:
+<a href="#name-uuid-ncname-test-vectors-for-r" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section A.1</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.1" class="relref">Appendix A.1</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>C232AB00-9414-11EC-B3C8-9F6BDECED846</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>byizkwaeucqpmhse7nppm5wcgl</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>B6S7oX73gv2Y1iTENdXX8hL</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>BwjKrAJQUHsPIn2vezthGL</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv2">
+<section id="appendix-B.5">
+        <h3 id="name-uuidv2">
+<a href="#appendix-B.5" class="section-number selfRef">B.5. </a><a href="#name-uuidv2" class="section-name selfRef">UUIDv2</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-d"></span><table class="center" id="table-17">
+          <caption>
+<a href="#table-17" class="selfRef">Table 17</a>:
+<a href="#name-uuid-ncname-test-vectors-for-d" class="selfRef">UUID-NCName Test Vectors for DCE Security</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">DCE Security</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>000003e8-cbb9-21ea-b201-00045a86c8a1</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>caaaah2glxepkeaiaarninsfbl</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>C11KtP6Y9P3rRkvh2N1e__L</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>CAAAD6Mu5HqIBAARahsihL</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv3">
+<section id="appendix-B.6">
+        <h3 id="name-uuidv3">
+<a href="#appendix-B.6" class="section-number selfRef">B.6. </a><a href="#name-uuidv3" class="section-name selfRef">UUIDv3</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-rf"></span><table class="center" id="table-18">
+          <caption>
+<a href="#table-18" class="selfRef">Table 18</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rf" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section A.2</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.2" class="relref">Appendix A.2</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>5df41881-3aed-3515-88a7-2f4a814cf09e</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>dlx2braj25vivrjzpjkauz4e6i</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>D3dTNMAmevR4NFAakRDtLdI</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>DXfQYgTrtUVinL0qBTPCeI</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv4">
+<section id="appendix-B.7">
+        <h3 id="name-uuidv4">
+<a href="#appendix-B.7" class="section-number selfRef">B.7. </a><a href="#name-uuidv4" class="section-name selfRef">UUIDv4</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-rfc"></span><table class="center" id="table-19">
+          <caption>
+<a href="#table-19" class="selfRef">Table 19</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rfc" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section A.3</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.3" class="relref">Appendix A.3</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>919108f7-52d1-4320-9bac-f847db4148a8</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>esgiqr52s2ezaxlhyi7nucsfij</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>E55CtqYNqva1mcmaa877eoJ</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>EkZEI91LRMgus-EfbQUioJ</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv5">
+<section id="appendix-B.8">
+        <h3 id="name-uuidv5">
+<a href="#appendix-B.8" class="section-number selfRef">B.8. </a><a href="#name-uuidv5" class="section-name selfRef">UUIDv5</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-rfc9"></span><table class="center" id="table-20">
+          <caption>
+<a href="#table-20" class="selfRef">Table 20</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rfc9" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section A.4</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.4" class="relref">Appendix A.4</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>2ed6657d-e927-568b-95e1-2665a8aea6a2</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ff3lgk7pje5ullyjgmwuk5jvcj</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>F2K15VFLUBD326h169SNPjJ</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>FLtZlfeknaLXhJmWorqaiJ</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv6">
+<section id="appendix-B.9">
+        <h3 id="name-uuidv6">
+<a href="#appendix-B.9" class="section-number selfRef">B.9. </a><a href="#name-uuidv6" class="section-name selfRef">UUIDv6</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-rfc95"></span><table class="center" id="table-21">
+          <caption>
+<a href="#table-21" class="selfRef">Table 21</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rfc95" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section A.5</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.5" class="relref">Appendix A.5</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>1EC9414C-232A-6B00-B3C8-9F6BDECED846</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>gd3euctbdfkyahse7nppm5wcgl</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>GrxRCnDiX4mxSq8bFQjT3_L</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>GHslBTCMqsAPIn2vezthGL</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv7">
+<section id="appendix-B.10">
+        <h3 id="name-uuidv7">
+<a href="#appendix-B.10" class="section-number selfRef">B.10. </a><a href="#name-uuidv7" class="section-name selfRef">UUIDv7</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-rfc956"></span><table class="center" id="table-22">
+          <caption>
+<a href="#table-22" class="selfRef">Table 22</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rfc956" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section A.6</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-A.6" class="relref">Appendix A.6</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>017F22E2-79B0-7CC3-98C4-DC0C0C07398F</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>haf7sfytzwdgdrrg4bqgaoompj</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>H3RrXaX7uTM6qdwrXwpC6_J</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>HAX8i4nmwzDjE3AwMBzmPJ</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="uuidv8">
+<section id="appendix-B.11">
+        <h3 id="name-uuidv8">
+<a href="#appendix-B.11" class="section-number selfRef">B.11. </a><a href="#name-uuidv8" class="section-name selfRef">UUIDv8</a>
+        </h3>
+<span id="name-uuid-ncname-test-vectors-for-rfc956-2"></span><table class="center" id="table-23">
+          <caption>
+<a href="#table-23" class="selfRef">Table 23</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rfc956-2" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section B.1</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-B.1" class="relref">Appendix B.1</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>2489E9AD-2EE2-8E00-8EC9-32D5F69181C0</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>iese6tljo4lqa5sjs2x3jdaoai</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>I22HpMAy5M181AjPFG7eLXI</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>IJInprS7i4A7JMtX2kYHAI</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+<span id="name-uuid-ncname-test-vectors-for-rfc956-3"></span><table class="center" id="table-24">
+          <caption>
+<a href="#table-24" class="selfRef">Table 24</a>:
+<a href="#name-uuid-ncname-test-vectors-for-rfc956-3" class="selfRef">UUID-NCName Test Vectors for RFC9562, Section B.2</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span>[<a href="#RFC9562" class="cite xref">RFC9562</a>], <a href="https://rfc-editor.org/rfc/rfc9562#appendix-B.2" class="relref">Appendix B.2</a></span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>5c146b14-3c52-8afd-938a-375d0df1fbf6</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ilqkgwfb4kkx5hcrxlug7d67wj</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>I3aR2J7aw1BJj4jJvfuWTXJ</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>IXBRrFDxSr9OKN10N8fv2J</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+</section>
+</div>
+<div id="implementations">
+<section id="appendix-C">
+      <h2 id="name-implementations">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-implementations" class="section-name selfRef">Implementations</a>
+      </h2>
+<p id="appendix-C-1">As of this writing, there are multiple implementations of UUID-NCName:<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="appendix-C-2.1">
+          <p id="appendix-C-2.1.1">Perl, <span><a href="https://metacpan.org/pod/Data::UUID::NCName">https://metacpan.org/pod/Data::UUID::NCName</a></span><a href="#appendix-C-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="appendix-C-2.2">
+          <p id="appendix-C-2.2.1">Ruby, <span><a href="https://rubygems.org/gems/uuid-ncname">https://rubygems.org/gems/uuid-ncname</a></span><a href="#appendix-C-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="appendix-C-2.3">
+          <p id="appendix-C-2.3.1">Java, by Werner Randelshofer <span><a href="https://github.com/wrandelshofer/UuidNCName">https://github.com/wrandelshofer/UuidNCName</a></span><a href="#appendix-C-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="compact" id="appendix-C-2.4">
+          <p id="appendix-C-2.4.1">Dart, by Yulian Kuncheff, <span><a href="https://github.com/daegalus/uuid-format-tester">https://github.com/daegalus/uuid-format-tester</a></span><a href="#appendix-C-2.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-D">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Dorian Taylor</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ietf@doriantaylor.com" class="email">ietf@doriantaylor.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://doriantaylor.com/" class="url">https://doriantaylor.com/</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Kyzer R. Davis</span></div>
+<div dir="auto" class="left"><span class="org">Cisco Systems</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:kydavis@cisco.com" class="email">kydavis@cisco.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
