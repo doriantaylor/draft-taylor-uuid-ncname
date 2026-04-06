@@ -1225,7 +1225,7 @@ li > p:last-of-type:only-child {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Taylor &amp; Davis</td>
-<td class="center">Expires 3 October 2026</td>
+<td class="center">Expires 8 October 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1238,12 +1238,12 @@ li > p:last-of-type:only-child {
 <dd class="internet-draft">draft-taylor-uuid-ncname-05</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-04-01" class="published">1 April 2026</time>
+<time datetime="2026-04-06" class="published">6 April 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-10-03">3 October 2026</time></dd>
+<dd class="expires"><time datetime="2026-10-08">8 October 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1280,7 +1280,7 @@ li > p:last-of-type:only-child {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1434,6 +1434,9 @@ li > p:last-of-type:only-child {
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.11">
                 <p id="section-toc.1-1.10.2.11.1"><a href="#appendix-B.11" class="auto internal xref">B.11</a>. <a href="#name-uuidv8" class="internal xref">UUIDv8</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.12">
+                <p id="section-toc.1-1.10.2.12.1"><a href="#appendix-B.12" class="auto internal xref">B.12</a>. <a href="#name-microsoft-variant-uuid" class="internal xref">Microsoft Variant UUID</a></p>
 </li>
             </ul>
 </li>
@@ -1743,9 +1746,14 @@ Review <a href="#variantTable" class="auto internal xref">Table 3</a> for all po
           </tbody>
         </table>
 </div>
-<p id="section-3.2-9">An example version/variant bookend layout for UUIDv4 follows the table where "M" represents the version placement for the BaseXX representation of 0x4 (0b0100) and "N" represents the variant placement for one of the four possible hexadecimal representations of variant 10xx: 0x8 (0b1000), 0x9 (0b1001), 0xA (0b1010), 0xB (0b1011) as its Base32, Base64, or Base58 symbol (<code>i/I</code>, <code>j/J</code>, <code>k/K</code>, or <code>l/L</code>)<a href="#section-3.2-9" class="pilcrow">¶</a></p>
+<p id="section-3.2-9">The UUID-NCName encoding is applicable to all UUID variants, including Microsoft/COM GUIDs (variant <code>0b110x</code>).
+For non-IETF/DCE variants, the variant bookend correctly reflects the variant (e.g., <code>m/M</code> or <code>n/N</code> for Microsoft), however the version bookend is only semantically meaningful for IETF/DCE UUIDs (variant <code>0b10xx</code>).
+In Microsoft UUIDs, for example, the bits occupying the version field position do not necessarily indicate an algorithm version.
+The version bookend will still be encoded and decoded correctly, but it <span class="bcp14">SHOULD NOT</span> be interpreted as a UUID version for non-IETF/DCE variants.
+See <a href="#microsoftTestVector" class="auto internal xref">Appendix B.12</a> for an example.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
+<p id="section-3.2-10">An example version/variant bookend layout for UUIDv4 follows the table where "M" represents the version placement for the BaseXX representation of 0x4 (0b0100) and "N" represents the variant placement for one of the four possible hexadecimal representations of variant 10xx: 0x8 (0b1000), 0x9 (0b1001), 0xA (0b1010), 0xB (0b1011) as its Base32, Base64, or Base58 symbol (<code>i/I</code>, <code>j/J</code>, <code>k/K</code>, or <code>l/L</code>)<a href="#section-3.2-10" class="pilcrow">¶</a></p>
 <span id="name-uuid-ncname-bookend-layout-"></span><figure id="figure-1">
-          <div class="alignLeft art-text artwork" id="section-3.2-10.1">
+          <div class="alignLeft art-text artwork" id="section-3.2-11.1">
 <pre>
 // UUID-NCName-32
 e000000000000000000000000i
@@ -1772,7 +1780,7 @@ MxxxxxxxxxxxxxxxxxxxxN
 <figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
 <a href="#name-uuid-ncname-bookend-layout-" class="selfRef">UUID-NCName Bookend Layout for UUIDv4</a>
           </figcaption></figure>
-<p id="section-3.2-11">Another example can be seen in <a href="#nilTestVectors" class="auto internal xref">Appendix B.2</a> for the nil UUID, which has all bits set to zero, and thus has the bookend characters <code>a/A</code> for both version and variant and for <a href="#maxTestVectors" class="auto internal xref">Appendix B.3</a> for the MAX UUID, which has all bits set to one, and thus has the bookend characters <code>p/P</code> for both version and variant.<a href="#section-3.2-11" class="pilcrow">¶</a></p>
+<p id="section-3.2-12">Another example can be seen in <a href="#nilTestVectors" class="auto internal xref">Appendix B.2</a> for the nil UUID, which has all bits set to zero, and thus has the bookend characters <code>a/A</code> for both version and variant and for <a href="#maxTestVectors" class="auto internal xref">Appendix B.3</a> for the MAX UUID, which has all bits set to one, and thus has the bookend characters <code>p/P</code> for both version and variant.<a href="#section-3.2-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="detection">
@@ -3245,6 +3253,56 @@ it would be with a canonical UUID representation.<a href="#section-3.3-9" class=
             </tr>
           </tbody>
         </table>
+</section>
+</div>
+<div id="microsoftTestVector">
+<section id="appendix-B.12">
+        <h3 id="name-microsoft-variant-uuid">
+<a href="#appendix-B.12" class="section-number selfRef">B.12. </a><a href="#name-microsoft-variant-uuid" class="section-name selfRef">Microsoft Variant UUID</a>
+        </h3>
+<p id="appendix-B.12-1">The following test vector uses a well-known Microsoft Azure Portal application identifier.
+Note that the version bookend (<code>A</code>/<code>a</code>, corresponding to <code>0x0</code>) does not indicate a UUID version in the IETF/DCE sense; it merely reflects the value of the bits in the version field position.
+The variant bookend (<code>M</code>/<code>m</code>) correctly identifies this as a Microsoft variant UUID.<a href="#appendix-B.12-1" class="pilcrow">¶</a></p>
+<span id="name-uuid-ncname-test-vectors-for-m"></span><div id="microsoftTestVectorTable">
+<table class="center" id="table-25">
+          <caption>
+<a href="#table-25" class="selfRef">Table 25</a>:
+<a href="#name-uuid-ncname-test-vectors-for-m" class="selfRef">UUID-NCName Test Vectors for Microsoft Variant UUID</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Microsoft.Azure.Portal</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>00000013-0000-0000-c000-000000000000</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-32</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>aaaaaaeyaaaaaaaaaaaaaaaaam</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-58</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>A111Mo9hVUdmNWqcCExF__M</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">UUID-NCName-64</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>AAAAAEwAAAAAAAAAAAAAAM</code>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
 </section>
 </div>
 </section>

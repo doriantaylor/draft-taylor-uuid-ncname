@@ -201,6 +201,12 @@ Review {{variantTable}} for all possible variant bit combinations.
 | E-F,     0b1110 - 0b1111  | o-p/O-P               | Reserved and MAX UUID |
 {: #variantTable title='Bookend Characters for UUID Variants'}
 
+The UUID-NCName encoding is applicable to all UUID variants, including Microsoft/COM GUIDs (variant `0b110x`).
+For non-IETF/DCE variants, the variant bookend correctly reflects the variant (e.g., `m/M` or `n/N` for Microsoft), however the version bookend is only semantically meaningful for IETF/DCE UUIDs (variant `0b10xx`).
+In Microsoft UUIDs, for example, the bits occupying the version field position do not necessarily indicate an algorithm version.
+The version bookend will still be encoded and decoded correctly, but it SHOULD NOT be interpreted as a UUID version for non-IETF/DCE variants.
+See {{microsoftTestVector}} for an example.
+
 An example version/variant bookend layout for UUIDv4 follows the table where "M" represents the version placement for the BaseXX representation of 0x4 (0b0100) and "N" represents the variant placement for one of the four possible hexadecimal representations of variant 10xx: 0x8 (0b1000), 0x9 (0b1001), 0xA (0b1010), 0xB (0b1011) as its Base32, Base64, or Base58 symbol (`i/I`, `j/J`, `k/K`, or `l/L`)
 
 ~~~
@@ -653,6 +659,20 @@ The test vectors use the same UUIDs and illustrative examples as RFC9562 to illu
 | UUID-NCName-58           | `I3aR2J7aw1BJj4jJvfuWTXJ`              |
 | UUID-NCName-64           | `IXBRrFDxSr9OKN10N8fv2J`               |
 {: title='UUID-NCName Test Vectors for RFC9562, Section B.2'}
+
+## Microsoft Variant UUID {#microsoftTestVector}
+
+The following test vector uses a well-known Microsoft Azure Portal application identifier.
+Note that the version bookend (`A`/`a`, corresponding to `0x0`) does not indicate a UUID version in the IETF/DCE sense; it merely reflects the value of the bits in the version field position.
+The variant bookend (`M`/`m`) correctly identifies this as a Microsoft variant UUID.
+
+| Encoding               | Output                                 |
+|------------------------|----------------------------------------|
+| Microsoft.Azure.Portal | `00000013-0000-0000-c000-000000000000` |
+| UUID-NCName-32         | `aaaaaaeyaaaaaaaaaaaaaaaaam`           |
+| UUID-NCName-58         | `A111Mo9hVUdmNWqcCExF__M`              |
+| UUID-NCName-64         | `AAAAAEwAAAAAAAAAAAAAAM`               |
+{: #microsoftTestVectorTable title='UUID-NCName Test Vectors for Microsoft Variant UUID'}
 
 # Implementations {#implementations}
 
