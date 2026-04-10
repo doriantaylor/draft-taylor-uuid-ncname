@@ -1,0 +1,7 @@
+kdrfc -rthv ./draft-taylor-uuid-ncname.md
+
+mv ./draft-taylor-uuid-ncname.txt ./docs/
+mv ./draft-taylor-uuid-ncname.html ./docs/
+mv ./draft-taylor-uuid-ncname.xml ./docs/
+
+git add docs/draft-taylor-uuid-ncname.txt docs/draft-taylor-uuid-ncname.html docs/draft-taylor-uuid-ncname.xml
