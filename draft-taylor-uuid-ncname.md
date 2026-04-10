@@ -18,12 +18,14 @@ pi: [toc, sortrefs, symrefs]
 workgroup: Independent
 
 author:
-  - name: Dorian Taylor
-    email: ietf@doriantaylor.com
-    uri: https://doriantaylor.com/
-  - name: Kyzer R. Davis
-    email: kydavis@cisco.com
-    org: Cisco Systems
+- name: Dorian Taylor
+  email: ietf@doriantaylor.com
+  uri: https://doriantaylor.com/
+- name: Kyzer R. Davis
+  email:
+    - kydavis@cisco.com
+    - kyzer.davis@outlook.com
+  org: Cisco Systems
 
 normative:
   RFC9562:
